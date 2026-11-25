@@ -7,7 +7,7 @@ on:
         default: "ep01"
   push:
     branches: ["claude/**"]
-    paths: [".github/workflows/scene-check.yml", "music/real/library.json"]
+    paths: [".github/workflows/scene-check.yml", "music/real/candidates.json"]
 
 permissions:
   contents: write
@@ -26,12 +26,15 @@ jobs:
           path: clips
           key: pexels-${{ hashFiles('music/real/library.json') }}
       - name: 준비
+        env:
+          SRC: ${{ github.event_name == 'push' && 'music/real/candidates.json' || format('music/episodes/{0}.json', inputs.episode) }}
         run: |
+          echo "SRC=$SRC" >> "$GITHUB_ENV"
           sudo apt-get update -q && sudo apt-get install -y -q ffmpeg
           pip install -q pillow
-          python music/real/fetch_clips.py music/episodes/${{ inputs.episode || 'ep01' }}.json clips
+          python music/real/fetch_clips.py "$SRC" clips
       - name: 사진 만들기
-        run: python music/real/contact_sheet.py music/episodes/${{ inputs.episode || 'ep01' }}.json clips sheets
+        run: python music/real/contact_sheet.py "$SRC" clips sheets
       - name: scene-check 브랜치에 저장
         run: |
           mkdir -p /tmp/sh && cp sheets/*.jpg /tmp/sh/
