@@ -54,7 +54,7 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           python3 - <<'PY'
-          import json, os, time, urllib.parse, urllib.request
+          import html, json, os, time, urllib.parse, urllib.request
           url = os.environ["URL"].rstrip("/")
           k = os.environ["K"]
           q = urllib.parse.quote("지금 현황 짧게 알려줘")
@@ -69,7 +69,7 @@ jobs:
                   time.sleep(5)
           print("자비스 대답:", ans)
           text = ("🎙 <b>자비스 설치 완료</b>\n\n"
-                  f"시험 질문 '지금 현황 짧게 알려줘'에 대한 대답:\n<i>{ans}</i>\n\n"
+                  f"시험 질문 '지금 현황 짧게 알려줘'에 대한 대답:\n<i>{html.escape(ans)}</i>\n\n"
                   "아래 주소를 꾹 눌러 복사해서, 단축어의 'URL 콘텐츠 가져오기' 주소 칸에 붙여 넣으세요.\n\n"
                   f"<code>{url}/ask?k={k}</code>")
           body = json.dumps({"chat_id": os.environ["TELEGRAM_CHAT_ID"], "text": text, "parse_mode": "HTML"}).encode()
