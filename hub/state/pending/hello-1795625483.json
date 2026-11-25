@@ -1,0 +1,20 @@
+{
+ "key": "hello-1795625483",
+ "agent": "hub",
+ "title": "시험 승인 요청이에요",
+ "asked": 1795625484.261821,
+ "message_id": 152,
+ "reminded": false,
+ "buttons": [
+  [
+   "👍 잘 보여요",
+   "approve"
+  ],
+  [
+   "👎 이상해요",
+   "drop"
+  ]
+ ],
+ "on_choice": null,
+ "repo": "jacobhong082-cmd/playlist-agent"
+}
