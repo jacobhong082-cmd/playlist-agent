@@ -284,7 +284,7 @@ def handle_text(msg: dict) -> None:
         for it in items[:8]:
             btns = it.get("buttons") or s.APPROVE_BUTTONS
             kb.append([{"text": f"{lab} · {it['title'][:14]}", "callback_data": f"p|{it['key']}|{ch}"}
-                       for lab, ch in btns[:2]])
+                       for lab, ch in btns])
         reply(pending_text(items), buttons=kb or None)
     elif "판매" in t and not SALES.match(t):
         ask_kdp()
@@ -324,6 +324,21 @@ def main() -> None:
         s.ask("hub", f"hello-{int(time.time())}", "시험 승인 요청이에요", "아무 버튼이나 눌러 보세요. 바로 '접수됐어요'가 뜨고 결과가 이 메시지에 붙어요.",
               buttons=[("👍 잘 보여요", "approve"), ("👎 이상해요", "drop")])
         return
+    reask = [a.split("=", 1)[1] for a in sys.argv if a.startswith("--reask=") and a.split("=", 1)[1]]
+    if reask:  # "다시 보내줘": 아직 안 누른 승인 요청을 새 메시지로 다시 보내고 바로 듣기 모드로
+        for key in reask[0].split(","):
+            key = key.strip()
+            item, isha = s.state_get(f"pending/{key}")
+            if not item:
+                print(f"(승인 대기에 없는 요청: {key})")
+                continue
+            btns = item.get("buttons") or s.APPROVE_BUTTONS
+            msg = s._send(f"{s._tag(item['agent'])} · 🟡 <b>승인 필요</b> (다시 보내요)\n<b>{s.esc(item['title'])}</b>\n"
+                          "누르자마자 '접수됐어요'가 떠요.", silent=False,
+                          buttons=[[{"text": lab, "callback_data": f"a|{key}|{ch}"} for lab, ch in btns]])
+            item["message_id"] = (msg or {}).get("message_id")
+            s.state_put(f"pending/{key}", item, isha, f"다시 보냄: {item['title'][:40]}")
+            print(f"다시 보냄: {key}")
     if "--ask-kdp" in sys.argv:
         ask_kdp()
         return
