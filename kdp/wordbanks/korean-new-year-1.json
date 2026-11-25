@@ -1,0 +1,921 @@
+{
+ "id": "korean-new-year-1",
+ "kind": "activity",
+ "title": "Korean New Year Activity Book",
+ "subtitle": "Seollal Word Search & Coloring for Adults and Teens: 15 Large Print Puzzles and 15 Bold & Easy Hangul Designs – A Lunar New Year Gift for K-Drama Fans and Korea Lovers",
+ "series": "{brand} Korea Puzzles",
+ "series_no": 1,
+ "cover_tag": "WORD SEARCH + COLORING",
+ "cover_line": "15 puzzles · 15 coloring pages · with Hangul",
+ "cover_korean": "설날 놀이책 · 새해 복 많이 받으세요",
+ "cover_words": [
+  "SEOLLAL",
+  "BOK"
+ ],
+ "price": 9.99,
+ "themes": [
+  {
+   "title": "New Year's Day",
+   "ko": "설날",
+   "words": [
+    [
+     "NEWYEAR",
+     "새해"
+    ],
+    [
+     "FAMILY",
+     "가족"
+    ],
+    [
+     "BOW",
+     "절"
+    ],
+    [
+     "BLESSING",
+     "덕담"
+    ],
+    [
+     "ENVELOPE",
+     "봉투"
+    ],
+    [
+     "MONEY",
+     "세뱃돈"
+    ],
+    [
+     "HANBOK",
+     "한복"
+    ],
+    [
+     "RICECAKE",
+     "떡"
+    ],
+    [
+     "SOUP",
+     "국"
+    ],
+    [
+     "GRANDMA",
+     "할머니"
+    ],
+    [
+     "GRANDPA",
+     "할아버지"
+    ],
+    [
+     "MORNING",
+     "아침"
+    ]
+   ]
+  },
+  {
+   "title": "The Tteokguk Table",
+   "ko": "떡국 한 그릇",
+   "words": [
+    [
+     "TTEOKGUK",
+     "떡국"
+    ],
+    [
+     "BROTH",
+     "육수"
+    ],
+    [
+     "EGG",
+     "달걀"
+    ],
+    [
+     "SEAWEED",
+     "김"
+    ],
+    [
+     "BEEF",
+     "소고기"
+    ],
+    [
+     "GREENONION",
+     "파"
+    ],
+    [
+     "GARLIC",
+     "마늘"
+    ],
+    [
+     "SESAME",
+     "참깨"
+    ],
+    [
+     "BOWL",
+     "그릇"
+    ],
+    [
+     "SPOON",
+     "숟가락"
+    ],
+    [
+     "RICE",
+     "쌀"
+    ],
+    [
+     "SALT",
+     "소금"
+    ]
+   ]
+  },
+  {
+   "title": "Holiday Feast",
+   "ko": "명절 음식",
+   "words": [
+    [
+     "JEON",
+     "전"
+    ],
+    [
+     "JAPCHAE",
+     "잡채"
+    ],
+    [
+     "GALBIJJIM",
+     "갈비찜"
+    ],
+    [
+     "SANJEOK",
+     "산적"
+    ],
+    [
+     "NAMUL",
+     "나물"
+    ],
+    [
+     "MANDU",
+     "만두"
+    ],
+    [
+     "FRUIT",
+     "과일"
+    ],
+    [
+     "PEAR",
+     "배"
+    ],
+    [
+     "PERSIMMON",
+     "감"
+    ],
+    [
+     "CHESTNUT",
+     "밤"
+    ],
+    [
+     "JUJUBE",
+     "대추"
+    ],
+    [
+     "TTEOK",
+     "떡"
+    ]
+   ]
+  },
+  {
+   "title": "Lucky Words",
+   "ko": "복을 부르는 말",
+   "words": [
+    [
+     "LUCK",
+     "복"
+    ],
+    [
+     "HEALTH",
+     "건강"
+    ],
+    [
+     "HAPPINESS",
+     "행복"
+    ],
+    [
+     "PEACE",
+     "평안"
+    ],
+    [
+     "WISH",
+     "소원"
+    ],
+    [
+     "HOPE",
+     "희망"
+    ],
+    [
+     "LOVE",
+     "사랑"
+    ],
+    [
+     "SMILE",
+     "웃음"
+    ],
+    [
+     "JOY",
+     "기쁨"
+    ],
+    [
+     "SUCCESS",
+     "성공"
+    ],
+    [
+     "DREAM",
+     "꿈"
+    ],
+    [
+     "THANKS",
+     "감사"
+    ]
+   ]
+  },
+  {
+   "title": "New Year Greetings",
+   "ko": "새해 인사",
+   "words": [
+    [
+     "SAEHAE",
+     "새해"
+    ],
+    [
+     "MANI",
+     "많이"
+    ],
+    [
+     "BADEUSEYO",
+     "받으세요"
+    ],
+    [
+     "GAMSAHAMNIDA",
+     "감사합니다"
+    ],
+    [
+     "ANNYEONGHASEYO",
+     "안녕하세요"
+    ],
+    [
+     "GEONGANGHASEYO",
+     "건강하세요"
+    ],
+    [
+     "CHUKHAHAEYO",
+     "축하해요"
+    ],
+    [
+     "SARANGHAEYO",
+     "사랑해요"
+    ],
+    [
+     "GOMAWO",
+     "고마워"
+    ],
+    [
+     "JALJINAESEYO",
+     "잘지내세요"
+    ],
+    [
+     "BOKJUMEONI",
+     "복주머니"
+    ],
+    [
+     "DEOKDAM",
+     "덕담"
+    ]
+   ]
+  },
+  {
+   "title": "Year of the Sheep",
+   "ko": "양의 해",
+   "words": [
+    [
+     "SHEEP",
+     "양"
+    ],
+    [
+     "WOOL",
+     "양털"
+    ],
+    [
+     "LAMB",
+     "어린양"
+    ],
+    [
+     "MEADOW",
+     "풀밭"
+    ],
+    [
+     "GRASS",
+     "풀"
+    ],
+    [
+     "FLOCK",
+     "무리"
+    ],
+    [
+     "SHEPHERD",
+     "목동"
+    ],
+    [
+     "GENTLE",
+     "온순한"
+    ],
+    [
+     "CALM",
+     "차분한"
+    ],
+    [
+     "KIND",
+     "친절한"
+    ],
+    [
+     "BELL",
+     "방울"
+    ],
+    [
+     "FARM",
+     "농장"
+    ]
+   ]
+  },
+  {
+   "title": "Folk Games",
+   "ko": "민속놀이",
+   "words": [
+    [
+     "YUT",
+     "윷"
+    ],
+    [
+     "MAL",
+     "말"
+    ],
+    [
+     "BOARD",
+     "판"
+    ],
+    [
+     "KITE",
+     "연"
+    ],
+    [
+     "TOP",
+     "팽이"
+    ],
+    [
+     "JEGI",
+     "제기"
+    ],
+    [
+     "SEESAW",
+     "널"
+    ],
+    [
+     "MARBLES",
+     "구슬"
+    ],
+    [
+     "GONGGI",
+     "공기"
+    ],
+    [
+     "WIN",
+     "이기다"
+    ],
+    [
+     "TEAM",
+     "편"
+    ],
+    [
+     "ROLL",
+     "던지기"
+    ]
+   ]
+  },
+  {
+   "title": "Hanbok Colors",
+   "ko": "한복 빛깔",
+   "words": [
+    [
+     "RED",
+     "빨강"
+    ],
+    [
+     "BLUE",
+     "파랑"
+    ],
+    [
+     "YELLOW",
+     "노랑"
+    ],
+    [
+     "PINK",
+     "분홍"
+    ],
+    [
+     "GREEN",
+     "초록"
+    ],
+    [
+     "PURPLE",
+     "보라"
+    ],
+    [
+     "GOLD",
+     "금색"
+    ],
+    [
+     "SILVER",
+     "은색"
+    ],
+    [
+     "WHITE",
+     "하양"
+    ],
+    [
+     "BLACK",
+     "검정"
+    ],
+    [
+     "SILK",
+     "비단"
+    ],
+    [
+     "RIBBON",
+     "고름"
+    ]
+   ]
+  },
+  {
+   "title": "Winter Days",
+   "ko": "겨울날",
+   "words": [
+    [
+     "SNOW",
+     "눈"
+    ],
+    [
+     "ICE",
+     "얼음"
+    ],
+    [
+     "MITTENS",
+     "벙어리장갑"
+    ],
+    [
+     "SCARF",
+     "목도리"
+    ],
+    [
+     "COCOA",
+     "코코아"
+    ],
+    [
+     "SLED",
+     "썰매"
+    ],
+    [
+     "ONDOL",
+     "온돌"
+    ],
+    [
+     "FROST",
+     "서리"
+    ],
+    [
+     "BLANKET",
+     "이불"
+    ],
+    [
+     "SWEETPOTATO",
+     "고구마"
+    ],
+    [
+     "WINTER",
+     "겨울"
+    ],
+    [
+     "STOVE",
+     "난로"
+    ]
+   ]
+  },
+  {
+   "title": "Holiday Gifts",
+   "ko": "명절 선물",
+   "words": [
+    [
+     "GIFT",
+     "선물"
+    ],
+    [
+     "BOX",
+     "상자"
+    ],
+    [
+     "RIBBON",
+     "리본"
+    ],
+    [
+     "CARD",
+     "카드"
+    ],
+    [
+     "HONEY",
+     "꿀"
+    ],
+    [
+     "GINSENG",
+     "인삼"
+    ],
+    [
+     "TEA",
+     "차"
+    ],
+    [
+     "SOCKS",
+     "양말"
+    ],
+    [
+     "SOAP",
+     "비누"
+    ],
+    [
+     "OIL",
+     "기름"
+    ],
+    [
+     "WRAP",
+     "포장"
+    ],
+    [
+     "BOJAGI",
+     "보자기"
+    ]
+   ]
+  },
+  {
+   "title": "Going Home",
+   "ko": "고향 가는 길",
+   "words": [
+    [
+     "HOMETOWN",
+     "고향"
+    ],
+    [
+     "TRAIN",
+     "기차"
+    ],
+    [
+     "HIGHWAY",
+     "고속도로"
+    ],
+    [
+     "TRAFFIC",
+     "교통"
+    ],
+    [
+     "COUSIN",
+     "사촌"
+    ],
+    [
+     "UNCLE",
+     "삼촌"
+    ],
+    [
+     "AUNT",
+     "이모"
+    ],
+    [
+     "NEPHEW",
+     "조카"
+    ],
+    [
+     "VILLAGE",
+     "마을"
+    ],
+    [
+     "YARD",
+     "마당"
+    ],
+    [
+     "PUPPY",
+     "강아지"
+    ],
+    [
+     "HUG",
+     "포옹"
+    ]
+   ]
+  },
+  {
+   "title": "Honoring Ancestors",
+   "ko": "차례",
+   "words": [
+    [
+     "CHARYE",
+     "차례"
+    ],
+    [
+     "TABLE",
+     "상"
+    ],
+    [
+     "CANDLE",
+     "초"
+    ],
+    [
+     "INCENSE",
+     "향"
+    ],
+    [
+     "PHOTO",
+     "사진"
+    ],
+    [
+     "RESPECT",
+     "존경"
+    ],
+    [
+     "MEMORY",
+     "기억"
+    ],
+    [
+     "ANCESTOR",
+     "조상"
+    ],
+    [
+     "GRAVE",
+     "산소"
+    ],
+    [
+     "VISIT",
+     "성묘"
+    ],
+    [
+     "FLOWERS",
+     "꽃"
+    ],
+    [
+     "PRAYER",
+     "기도"
+    ]
+   ]
+  },
+  {
+   "title": "First Full Moon",
+   "ko": "정월대보름",
+   "words": [
+    [
+     "FULLMOON",
+     "보름달"
+    ],
+    [
+     "WISH",
+     "소원"
+    ],
+    [
+     "FIRE",
+     "불"
+    ],
+    [
+     "NUTS",
+     "부럼"
+    ],
+    [
+     "WALNUT",
+     "호두"
+    ],
+    [
+     "PEANUT",
+     "땅콩"
+    ],
+    [
+     "OGOKBAP",
+     "오곡밥"
+    ],
+    [
+     "NIGHT",
+     "밤"
+    ],
+    [
+     "STAR",
+     "별"
+    ],
+    [
+     "LANTERN",
+     "등불"
+    ],
+    [
+     "SKY",
+     "하늘"
+    ],
+    [
+     "MOONLIGHT",
+     "달빛"
+    ]
+   ]
+  },
+  {
+   "title": "Sweet Treats",
+   "ko": "달콤한 한과",
+   "words": [
+    [
+     "YAKGWA",
+     "약과"
+    ],
+    [
+     "YUGWA",
+     "유과"
+    ],
+    [
+     "GANGJEONG",
+     "강정"
+    ],
+    [
+     "DASIK",
+     "다식"
+    ],
+    [
+     "JEONGGWA",
+     "정과"
+    ],
+    [
+     "SIKHYE",
+     "식혜"
+    ],
+    [
+     "SUJEONGGWA",
+     "수정과"
+    ],
+    [
+     "INJEOLMI",
+     "인절미"
+    ],
+    [
+     "GARAETTEOK",
+     "가래떡"
+    ],
+    [
+     "BAEKSEOLGI",
+     "백설기"
+    ],
+    [
+     "HANGWA",
+     "한과"
+    ],
+    [
+     "YEOT",
+     "엿"
+    ]
+   ]
+  },
+  {
+   "title": "New Year Goals",
+   "ko": "새해 다짐",
+   "words": [
+    [
+     "EXERCISE",
+     "운동"
+    ],
+    [
+     "READ",
+     "독서"
+    ],
+    [
+     "TRAVEL",
+     "여행"
+    ],
+    [
+     "SAVE",
+     "저축"
+    ],
+    [
+     "LEARN",
+     "배우기"
+    ],
+    [
+     "KOREAN",
+     "한국어"
+    ],
+    [
+     "COOK",
+     "요리"
+    ],
+    [
+     "SLEEP",
+     "잠"
+    ],
+    [
+     "WALK",
+     "산책"
+    ],
+    [
+     "DIARY",
+     "일기"
+    ],
+    [
+     "GARDEN",
+     "정원"
+    ],
+    [
+     "PAINT",
+     "그림"
+    ]
+   ]
+  }
+ ],
+ "coloring": [
+  {
+   "kind": "word",
+   "ko": "복",
+   "en": "Bok · good fortune",
+   "note": "The most loved word on Korean New Year: may luck find you this year."
+  },
+  {
+   "kind": "jogakbo"
+  },
+  {
+   "kind": "word",
+   "ko": "새해",
+   "en": "Saehae · new year",
+   "note": "Koreans greet the year with 'Saehae bok mani badeuseyo!'"
+  },
+  {
+   "kind": "rosette"
+  },
+  {
+   "kind": "word",
+   "ko": "행복",
+   "en": "Haengbok · happiness",
+   "note": "A wish written on cards and envelopes of New Year money."
+  },
+  {
+   "kind": "lattice"
+  },
+  {
+   "kind": "word",
+   "ko": "설날",
+   "en": "Seollal · Lunar New Year's Day",
+   "note": "Families gather, bow to elders and share rice cake soup."
+  },
+  {
+   "kind": "jogakbo"
+  },
+  {
+   "kind": "word",
+   "ko": "사랑",
+   "en": "Sarang · love",
+   "note": "Two simple letters, one big feeling."
+  },
+  {
+   "kind": "rosette"
+  },
+  {
+   "kind": "word",
+   "ko": "희망",
+   "en": "Huimang · hope",
+   "note": "Start the year with a little hope in your pocket."
+  },
+  {
+   "kind": "lattice"
+  },
+  {
+   "kind": "word",
+   "ko": "건강",
+   "en": "Geongang · good health",
+   "note": "The first wish elders give to everyone at Seollal."
+  },
+  {
+   "kind": "jogakbo"
+  },
+  {
+   "kind": "word",
+   "ko": "꿈",
+   "en": "Kkum · dream",
+   "note": "Dream big this year."
+  }
+ ],
+ "back_title": "Saehae bok mani badeuseyo!",
+ "back_lines": [
+  "Happy Lunar New Year, the Korean way",
+  "15 large-print word searches about Seollal",
+  "15 bold & easy coloring pages of lucky Hangul words",
+  "Every word in English letters and Hangul"
+ ],
+ "description": "<p><b>Celebrate Seollal, the Korean Lunar New Year, with puzzles, coloring and a little Hangul.</b></p><p>This activity book mixes 15 large-print word searches with 15 bold and easy coloring pages. Find the words for tteokguk, New Year money, folk games and family visits, then color lucky Korean words such as 복 (good fortune), 행복 (happiness) and 희망 (hope).</p><ul><li>15 word searches, one per page, every word shown in English letters and Hangul</li><li>15 coloring pages printed on one side, with the meaning of each Korean word</li><li>Solutions at the back</li><li>8.5 x 11 inch pages</li></ul><p>A thoughtful Lunar New Year gift for K-drama fans, Korean-American families and anyone who loves Korea.</p>",
+ "keywords": [
+  "korean lunar new year gifts",
+  "seollal activity book",
+  "k drama fan gifts",
+  "korean word search large print",
+  "hangul coloring book",
+  "lunar new year 2027 gifts for adults",
+  "korean american family gifts"
+ ],
+ "categories": [
+  "Games & Activities > Word Search",
+  "Holidays > Lunar New Year",
+  "Foreign Language Study & Reference > Korean"
+ ]
+}
