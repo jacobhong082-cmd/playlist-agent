@@ -113,7 +113,7 @@ def deliver(book_id: str, redo: int):
     send_doc(out / "interior.pdf", f"① 속지 (Manuscript) · {info['pages']}쪽")
     send_doc(out / "cover.pdf", f"② 표지 (Cover) · 책등 {info['cover']['spine_in']}인치")
     fields = [
-        ("제목 Title", lst["title"]), ("부제 Subtitle", lst["subtitle"]), ("시리즈 Series", lst["series"]),
+        ("제목 Title", lst["title"]), ("부제 Subtitle", lst["subtitle"]), ("시리즈 Series (이름 + 번호)", f"{lst['series']}\n번호(Series number): {lst.get('series_no', 1)}"),
         ("저자 Author (이름 칸에 그대로)", lst["author"]),
         ("설명 Description (KDP 설명 칸은 HTML도 받아요)", lst["description"]),
         ("키워드 7칸 (한 줄씩 한 칸에)", "\n".join(lst["keywords"])),

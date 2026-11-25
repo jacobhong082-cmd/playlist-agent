@@ -358,6 +358,28 @@ PATTERNS = {
 }
 
 
+def draw_word(rnd, w, h, ko, lw=12):
+    """한글 낱말을 속이 빈 큰 글씨로 (색칠용) + 둘레에 꽃 고리."""
+    im = Image.new("L", (w, h), 255)
+    d = ImageDraw.Draw(im)
+    cx, cy = w / 2, h / 2
+    R = min(w, h) / 2 - 30
+    n = rnd.choice([12, 14, 16])
+    pr = R * math.sin(math.pi / n) * 0.92
+    for j in range(n):
+        a = math.radians(j * 360 / n)
+        _flower(d, cx + math.cos(a) * (R - pr), cy + math.sin(a) * (R - pr), pr, lw - 2, petals=5, rot=rnd.choice([90, 54]))
+    inner = R - 2 * pr - 30
+    d.ellipse([cx - inner, cy - inner, cx + inner, cy + inner], outline=INK, width=lw)
+    px = int(inner * (1.15 if len(ko) == 1 else 0.78 if len(ko) == 2 else 0.55))
+    f = font(F_MJ, px)
+    while d.textlength(ko, font=f) > inner * 1.6:
+        px -= 20
+        f = font(F_MJ, px)
+    d.text((cx, cy), ko, font=f, fill=255, anchor="mm", stroke_width=lw, stroke_fill=INK)
+    return im
+
+
 def coloring_art(kind, rnd):
     w, h = PW - 2 * MARGIN, PH - 2 * MARGIN - 330
     if kind == "jogakbo":
@@ -367,12 +389,16 @@ def coloring_art(kind, rnd):
     return draw_lattice(rnd, w, h)
 
 
-def coloring_page(no, kind, rnd):
+def coloring_page(no, kind, rnd, word=None):
     im = page()
-    art = coloring_art(kind, rnd)
+    if word:
+        art = draw_word(rnd, PW - 2 * MARGIN, PH - 2 * MARGIN - 330, word["ko"])
+        en, ko, note = word["en"], word["ko"], word["note"]
+    else:
+        art = coloring_art(kind, rnd)
+        en, ko, note = PATTERNS[kind]
     im.paste(art, (MARGIN, MARGIN))
     d = ImageDraw.Draw(im)
-    en, ko, note = PATTERNS[kind]
     y = PH - MARGIN - 250
     ctext(d, (PW / 2, y), f"{no}. {en}", font(F_SERIF, 80))
     ctext(d, (PW / 2, y + 100), ko, font(F_MJ, 58), GRAY)
@@ -420,7 +446,60 @@ def build_coloring(spec: dict, seed: int):
     return pages, sample_art, {"designs": spec["designs"], "fingerprint": _fp(fps)}
 
 
+def build_activity(spec: dict, seed: int):
+    """단어 찾기 1쪽 → 컬러링 1쪽(뒷면 비움) 을 번갈아. 정답은 맨 뒤."""
+    rnd = random.Random(seed)
+    themes = spec["themes"]
+    grids = [build_grid([w for w, _ in t["words"]], seed * 1000 + i) for i, t in enumerate(themes)]
+    pages = [
+        text_page([(spec["title"], F_SERIF, 120, INK, 170), (spec.get("cover_tag", ""), F_BOLD, 60, 90, 140),
+                   (spec["cover_korean"], F_MJ, 64, GRAY, 260), (BRAND, F_BOLD, 52, GRAY, 0)], top=MARGIN + 700),
+        text_page([(f"{spec['title']} — {BRAND}", F_REG, 44, INK, 80),
+                   ("Copyright © 2026 " + BRAND + ". All rights reserved.", F_REG, 40, GRAY, 80),
+                   ("Puzzles and patterns were made by computer code; every puzzle is checked by machine.", F_REG, 40, GRAY, 80),
+                   (BRAND_MEANING, F_REG, 40, GRAY, 80)], top=PH - MARGIN - 500),
+        text_page([("How to Use This Book", F_SERIF, 110, INK, 220),
+                   ("Word search: find each word in the grid.", F_REG, 56, INK, 95),
+                   ("Words run left to right, top to bottom, or diagonally. Never backwards.", F_REG, 50, INK, 95),
+                   ("Coloring: each design sits on its own page, with a blank back.", F_REG, 56, INK, 220),
+                   ("Every Korean word comes with its sound and meaning.", F_BOLD, 54, 70, 95),
+                   ("Say it out loud and you are already speaking a little Korean!", F_REG, 52, GRAY, 0)]),
+        page()]
+    col = spec["coloring"]
+    fps = []
+    word_sample = None
+    for i, (t, (g, pl)) in enumerate(zip(themes, grids)):
+        pages.append(puzzle_page(i + 1, t, g, pl))
+        if i < len(col):
+            c = col[i]
+            im, art = coloring_page(i + 1, c["kind"], rnd, word=c if c["kind"] == "word" else None)
+            if word_sample is None and c["kind"] == "word":
+                word_sample = im
+            fps.append(hashlib.sha1(art.resize((64, 64)).tobytes()).hexdigest()[:12])
+            pages += [im, page()]
+    for s0 in range(0, len(themes), 4):
+        pages.append(solutions_page(s0 + 1, [(themes[j], *grids[j]) for j in range(s0, min(s0 + 4, len(themes)))]))
+    pages.append(text_page([("Thank you!", F_SERIF, 130, INK, 200), ("새해 복 많이 받으세요", F_MJ, 64, GRAY, 120),
+                            ("Saehae bok mani badeuseyo · Happy New Year!", F_REG, 52, INK, 160),
+                            ("A short honest review on Amazon helps a small publisher a lot.", F_REG, 50, INK, 0)]))
+    if len(pages) % 2:
+        pages.append(page())
+    for n, im in enumerate(pages[4:], start=5):
+        page_number(ImageDraw.Draw(im), n)
+    words = sorted({w for t in themes for w, _ in t["words"]})
+    return pages, word_sample, {"puzzles": len(themes), "words": len(words), "designs": len(col),
+                                "fingerprint": _fp(words + fps)}
+
+
 # =========================================================== 표지
+def fit(d, text, path, start, maxw):
+    """상자 폭에 맞게 글자 크기를 줄임."""
+    px = start
+    while px > 40 and d.textlength(text, font=font(path, px)) > maxw:
+        px -= 6
+    return font(path, px)
+
+
 def spine_in(pages: int) -> float:
     return pages * PAPER_IN_PER_PAGE
 
@@ -447,7 +526,8 @@ def build_cover(spec: dict, kind: str, pages: int, seed: int, back_sample: Image
             for c in range(PW // cell + 1):
                 ch = letters[(r * 13 + c * 7) % len(letters)]
                 ctext(d, (fx + c * cell + 100, r * cell + 100), ch, f, (226, 220, 206))
-        for (r, c, word, col) in ((2, 1, "KIMCHI", APRICOT), (12, 3, "HANGUL", MINT)):
+        w1, w2 = (spec.get("cover_words") or ["KIMCHI", "HANGUL"])[:2]
+        for (r, c, word, col) in ((2, max(0, (10 - len(w1)) // 2), w1, APRICOT), (12, max(0, (10 - len(w2)) // 2), w2, MINT)):
             for i, ch in enumerate(word):
                 x, y = fx + (c + i) * cell + 100, r * cell + 100
                 d.ellipse([x - 88, y - 88, x + 88, y + 88], fill=col)
@@ -456,16 +536,17 @@ def build_cover(spec: dict, kind: str, pages: int, seed: int, back_sample: Image
     d.rounded_rectangle(box, 90, fill="white", outline=MINT if kind != "coloring" else INK_RGB, width=14)
     cx = (box[0] + box[2]) / 2
     top = box[1]
-    ctext(d, (cx, top + 170), "LARGE PRINT" if kind == "wordsearch" else "BOLD & EASY", font(F_BOLD, 96), (200, 120, 80))
+    maxw = box[2] - box[0] - 160
+    tag = spec.get("cover_tag") or ("BOLD & EASY" if kind == "coloring" else "LARGE PRINT")
+    ctext(d, (cx, top + 180), tag, fit(d, tag, F_BOLD, 96, maxw), (200, 120, 80))
     title = spec["title"].split(" ")
-    if kind == "wordsearch":
-        ctext(d, (cx, top + 410), " ".join(title[:-2]) or spec["title"], font(F_SERIF, 270), INK_RGB)
-        ctext(d, (cx, top + 680), " ".join(title[-2:]), font(F_SERIF, 210), (60, 120, 100))
-    else:
-        ctext(d, (cx, top + 400), " ".join(title[:2]), font(F_SERIF, 230), INK_RGB)
-        ctext(d, (cx, top + 650), " ".join(title[2:]), font(F_SERIF, 200), (60, 120, 100))
-    ctext(d, (cx, top + 880), spec["cover_line"], font(F_REG, 78), (90, 90, 90))
-    ctext(d, (cx, top + 1030), spec["cover_korean"], font(F_MJ, 84), (130, 130, 130))
+    l1, l2 = (" ".join(title[:2]), " ".join(title[2:])) if kind == "coloring" else (" ".join(title[:-2]) or spec["title"], " ".join(title[-2:]))
+    ctext(d, (cx, top + 405), l1, fit(d, l1, F_SERIF, 270, maxw), INK_RGB)
+    ctext(d, (cx, top + 665), l2, fit(d, l2, F_SERIF, 210, maxw), (60, 120, 100))
+    ctext(d, (cx, top + 880), spec["cover_line"], fit(d, spec["cover_line"], F_REG, 78, maxw), (90, 90, 90))
+    ctext(d, (cx, top + 1030), spec["cover_korean"], fit(d, spec["cover_korean"], F_MJ, 84, maxw), (130, 130, 130))
+    if spec.get("series_no"):
+        ctext(d, (cx, top + 75), f"BOOK {spec['series_no']}", font(F_BOLD, 50), (120, 120, 120))
     d.rounded_rectangle([cx - 560, H - b - 320, cx + 560, H - b - 150], 40, fill="white")
     ctext(d, (cx, H - b - 235), f"{BRAND.upper()} · {BRAND_KO}", font(F_BOLD, 74), (110, 110, 110))
     # 책등 (100쪽 이상일 때만 글씨)
@@ -527,17 +608,18 @@ def preview(cover_img, samples, out: Path):
 
 
 def listing(spec: dict, kind: str, pages: int) -> dict:
-    ai = ("AI 질문: 'Did you use AI tools…?' → Yes. 글(Text): 'AI-generated' 를 고르고 도구 이름에 'Claude' "
-          "(낱말 목록·문구를 AI가 함께 만듦). 그림(Images): 'None' (코드로 그린 격자·무늬). 번역: None.")
-    if kind == "coloring":
-        ai = ("AI 질문: 'Did you use AI tools…?' → Yes. 글(Text): 'AI-generated', 도구 이름 'Claude' "
-              "(설명 문구). 그림(Images): 'None' (AI 그림 도구가 아니라 코드로 그린 무늬). 번역: None.")
+    ai = ("⚠️ 꼭 사실대로 답해요 (숨기면 계정이 막힐 수 있어요)\n"
+          "'Did you use AI tools in creating texts, images, and/or translations?' → Yes\n"
+          "• Texts: 'AI-generated' 선택 → 도구 이름 'Claude' (낱말 목록·설명 문구를 AI가 만듦)\n"
+          "• Images: 'None' (그림 AI가 아니라 코드로 그린 격자·무늬·글자)\n"
+          "• Translations: 'None'")
     # 8.5x11은 KDP '큰 판형'(large trim). 흑백 24~108쪽은 정액, 그 이상은 쪽당 (2025년 KDP 표 기준, 추정치)
     printing = 2.84 if pages <= 108 else round(1.00 + 0.017 * pages, 2)
     return {
         "title": spec["title"],
         "subtitle": spec["subtitle"],
         "series": spec["series"].replace("{brand}", BRAND.split()[0]),
+        "series_no": spec.get("series_no", 1),
         "author": BRAND,
         "description": spec["description"] + (f"<p><i>{BRAND_MEANING}</i></p>" if BRAND_MEANING else ""),
         "keywords": spec["keywords"],
@@ -560,6 +642,9 @@ def make_book(spec: dict, out: Path, seed: int | None = None) -> dict:
     if kind == "wordsearch":
         pages, sample, info = build_wordsearch(spec, seed)
         samples = [pages[3], pages[-3] if len(pages) > 6 else None]
+    elif kind == "activity":
+        pages, sample, info = build_activity(spec, seed)
+        samples = [pages[4], pages[5]]
     else:
         pages, sample, info = build_coloring(spec, seed)
         samples = [pages[4], pages[6]]
