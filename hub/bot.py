@@ -416,6 +416,21 @@ def main() -> None:
             break
     print(f"새 소식 {total}개 처리 · {round((time.time() - start) / 60, 1)}분 대기")
     remind_pending()
+    keep_listening()
+
+
+def keep_listening() -> None:
+    """하루 안에 보낸 승인 요청이 아직 남아 있으면, 이번 작업이 끝나자마자 다음 듣기 작업을 이어서 켬.
+    GitHub 5분 예약이 거의 안 돌아서, 승인 대기가 있는 동안은 언제 눌러도 바로 반응하게 하려는 것.
+    승인 대기가 없거나 하루가 지나면 멈춤 (그 뒤엔 리마인드 + 예약 확인)."""
+    fresh = [it for it in pending_items() if time.time() - it.get("asked", 0) < 24 * 3600]
+    if not fresh:
+        print("승인 대기 없음 → 듣기 이어가기 안 함")
+        return
+    code, j = s._gh("POST", f"/repos/{s.HUB_REPO}/actions/workflows/secretary.yml/dispatches",
+                    {"ref": s.HUB_BRANCH, "inputs": {"listen": "25"}})
+    print(f"승인 대기 {len(fresh)}건 → 다음 듣기 작업 예약 ({code})")
+
 
 if __name__ == "__main__":
     main()
