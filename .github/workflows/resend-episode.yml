@@ -1,0 +1,47 @@
+name: 회차 승인 카드 다시 보내기
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        required: true
+      episode:
+        default: "ep01"
+  push:
+    branches: ["claude/**"]
+    paths: ["music/resend.json"]
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  resend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: { ref: main, path: hub_main }
+      - id: v
+        run: |
+          python3 - >> "$GITHUB_OUTPUT" <<'PY'
+          import json, os
+          j = json.load(open("music/resend.json")) if os.path.exists("music/resend.json") else {}
+          print("run_id=" + str("${{ inputs.run_id }}" or j.get("run_id", "")))
+          print("episode=" + str("${{ inputs.episode }}" or j.get("episode", "ep01")))
+          PY
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ steps.v.outputs.episode }}-video
+          run-id: ${{ steps.v.outputs.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: out
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 텔레그램 미리보기 + 승인 버튼 (업로드 연결)
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python music/send_episode.py out "https://github.com/${{ github.repository }}/actions/runs/${{ steps.v.outputs.run_id }}" "${{ steps.v.outputs.run_id }}"
