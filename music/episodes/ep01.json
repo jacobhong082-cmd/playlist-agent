@@ -9,17 +9,20 @@
   {
    "slug": "r2_01_han_river_lights",
    "title": "Han River Lights",
-   "reuse": "samples/r2_01_han_river_lights.mp3"
+   "reuse": "samples/r2_01_han_river_lights.mp3",
+   "clip": "35991482"
   },
   {
    "slug": "r2_02_amber_glass",
    "title": "Amber Glass",
-   "reuse": "samples/r2_02_amber_glass.mp3"
+   "reuse": "samples/r2_02_amber_glass.mp3",
+   "clip": "6270171"
   },
   {
    "slug": "r2_03_after_midnight_bridge",
    "title": "After Midnight Bridge",
-   "reuse": "samples/r2_03_after_midnight_bridge.mp3"
+   "reuse": "samples/r2_03_after_midnight_bridge.mp3",
+   "clip": "18674366"
   },
   {
    "slug": "ep01_04_second_pour",
@@ -28,7 +31,8 @@
    "lyrics": "[Instrumental]",
    "bpm": 68,
    "keyscale": "F major",
-   "instrumental": true
+   "instrumental": true,
+   "clip": "13610011"
   },
   {
    "slug": "ep01_05_neon_on_the_water",
@@ -37,7 +41,8 @@
    "lyrics": "[Instrumental]",
    "bpm": 76,
    "keyscale": "G major",
-   "instrumental": true
+   "instrumental": true,
+   "clip": "37050676"
   },
   {
    "slug": "ep01_06_last_call_at_the_window",
@@ -46,7 +51,8 @@
    "lyrics": "[Instrumental]",
    "bpm": 64,
    "keyscale": "C minor",
-   "instrumental": true
+   "instrumental": true,
+   "clip": "35099181"
   },
   {
    "slug": "ep01_07_ice_melting_slowly",
@@ -55,7 +61,8 @@
    "lyrics": "[Instrumental]",
    "bpm": 70,
    "keyscale": "Ab major",
-   "instrumental": true
+   "instrumental": true,
+   "clip": "30211454"
   },
   {
    "slug": "ep01_08_rooftop__1_a_m",
@@ -64,7 +71,8 @@
    "lyrics": "[Instrumental]",
    "bpm": 80,
    "keyscale": "E minor",
-   "instrumental": true
+   "instrumental": true,
+   "clip": "32005879"
   },
   {
    "slug": "ep01_09_taxi_lights_passing",
@@ -73,7 +81,8 @@
    "lyrics": "[Instrumental]",
    "bpm": 78,
    "keyscale": "D minor",
-   "instrumental": true
+   "instrumental": true,
+   "clip": "31176873"
   },
   {
    "slug": "ep01_10_quiet_bridge",
@@ -82,7 +91,8 @@
    "lyrics": "[Instrumental]",
    "bpm": 62,
    "keyscale": "A major",
-   "instrumental": true
+   "instrumental": true,
+   "clip": "4192175"
   },
   {
    "slug": "ep01_11_oak___smoke",
@@ -91,7 +101,8 @@
    "lyrics": "[Instrumental]",
    "bpm": 66,
    "keyscale": "Eb major",
-   "instrumental": true
+   "instrumental": true,
+   "clip": "7255133"
   },
   {
    "slug": "ep01_12_riverside_bench",
@@ -100,7 +111,8 @@
    "lyrics": "[Instrumental]",
    "bpm": 74,
    "keyscale": "D major",
-   "instrumental": true
+   "instrumental": true,
+   "clip": "11336687"
   },
   {
    "slug": "ep01_13_golden_hour_was_hours_ago",
@@ -109,7 +121,8 @@
    "lyrics": "[Instrumental]",
    "bpm": 60,
    "keyscale": "Bb major",
-   "instrumental": true
+   "instrumental": true,
+   "clip": "32537512"
   },
   {
    "slug": "ep01_14_slow_ripples",
@@ -118,7 +131,8 @@
    "lyrics": "[Instrumental]",
    "bpm": 58,
    "keyscale": "Gb major",
-   "instrumental": true
+   "instrumental": true,
+   "clip": "4565572"
   },
   {
    "slug": "ep01_15_unhurried",
@@ -127,7 +141,8 @@
    "lyrics": "[Instrumental]",
    "bpm": 72,
    "keyscale": "C major",
-   "instrumental": true
+   "instrumental": true,
+   "clip": "36207172"
   },
   {
    "slug": "ep01_16_a_glass_half_full_of_night",
@@ -136,7 +151,8 @@
    "lyrics": "[Instrumental]",
    "bpm": 63,
    "keyscale": "F minor",
-   "instrumental": true
+   "instrumental": true,
+   "clip": "10317805"
   },
   {
    "slug": "ep01_17_late_train_over_the_river",
@@ -145,7 +161,8 @@
    "lyrics": "[Instrumental]",
    "bpm": 76,
    "keyscale": "A minor",
-   "instrumental": true
+   "instrumental": true,
+   "clip": "3882891"
   },
   {
    "slug": "ep01_18_lamp_still_on",
@@ -154,7 +171,8 @@
    "lyrics": "[Instrumental]",
    "bpm": 56,
    "keyscale": "E major",
-   "instrumental": true
+   "instrumental": true,
+   "clip": "4231452"
   },
   {
    "slug": "ep01_19_until_the_lights_go_out",
@@ -163,7 +181,10 @@
    "lyrics": "[Instrumental]",
    "bpm": 54,
    "keyscale": "Db major",
-   "instrumental": true
+   "instrumental": true,
+   "clip": "5606315"
   }
- ]
+ ],
+ "visual": "real",
+ "library": "music/real/library.json"
 }

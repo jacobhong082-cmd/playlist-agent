@@ -34,7 +34,7 @@ def ts(sec: float) -> str:
     return f"{h}:{m:02d}:{s:02d}" if h else f"{m}:{s:02d}"
 
 
-def main(ep_path, songs_dir, out_dir):
+def main(ep_path, songs_dir, out_dir, clips_dir="clips"):
     ep = json.loads(Path(ep_path).read_text())
     songs_dir, out = Path(songs_dir), Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
@@ -67,6 +67,16 @@ def main(ep_path, songs_dir, out_dir):
     run(cmd + ["-filter_complex", ";".join(chain), "-map", "[aout]", "-c:a", "aac", "-b:a", "192k",
                "-ar", "48000", str(out / "audio.m4a")])
 
+    if ep.get("visual") == "real":  # 곡마다 실사 장면
+        sys.path.insert(0, str(Path(__file__).parent / "real"))
+        import real_video
+        real_video.build(ep, tracks, starts, total, out, Path(clips_dir), cf)
+    else:
+        paint(ep, tracks, starts, total, out)
+    write_meta(ep, tracks, starts, total, missing, out)
+
+
+def paint(ep, tracks, starts, total, out):
     # 2) 8초 반복 배경 영상
     scene = Scene(seed=sum(map(ord, ep["id"])))
     frames = out / "frames"
@@ -109,11 +119,16 @@ def main(ep_path, songs_dir, out_dir):
 
     # 5) 썸네일 + 설명
     thumbnail(scene, ep["thumb_line1"], ep["thumb_line2"], str(out / "thumb.jpg"))
+
+
+def write_meta(ep, tracks, starts, total, missing, out):
     lines = [f"{ts(st)} {tr['title']}" for tr, st in zip(tracks, starts)]
     desc = (ep.get("story") or "Pour something warm, dim the lights, and let the river do the talking.") + \
         "\n\nTracklist\n" + "\n".join(lines) + \
         "\n\nAll music in this video is original and was created with AI (ACE-Step), " \
-        "then selected and arranged by Window Seat Tapes. The scene is an original illustration."
+        "then selected and arranged by Window Seat Tapes. " + \
+        ("Footage: Pexels (free license), edited and color graded for this mix." if ep.get("visual") == "real"
+         else "The scene is an original illustration.")
     (out / "description.txt").write_text(desc)
     meta = {"id": ep["id"], "title": ep["title"], "description": desc, "duration": round(total),
             "tracks": [{"title": tr["title"], "start": round(st), "slug": tr["slug"]} for tr, st in zip(tracks, starts)],
@@ -125,4 +140,4 @@ def main(ep_path, songs_dir, out_dir):
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:4])
+    main(*sys.argv[1:5])
