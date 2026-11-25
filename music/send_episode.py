@@ -25,5 +25,6 @@ if rel:
 checks = [(meta.get("ai") is True, "AI 표시"), (meta.get("made_for_kids") is False, "아동용 아님"),
           (len(meta["tracks"]) >= 3, "챕터"), (mins >= 55, "1시간 분량")]
 k = s.ask("playlist", f"pl-{meta['id']}" + (f"-{run_id[-6:]}" if run_id else ""), "새 플레이리스트 영상 어때요?", body[:900],
-          photo=f"{out}/thumb.jpg", checks=checks)
+          photo=f"{out}/thumb.jpg", checks=checks,
+          on_choice={"workflow": "upload.yml", "inputs": {"run_id": run_id, "episode": meta["id"]}} if run_id else None)
 print("asked key", k)
