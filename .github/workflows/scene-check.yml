@@ -1,0 +1,44 @@
+name: 장면 점검 (실사 영상 미리보기 사진)
+
+on:
+  workflow_dispatch:
+    inputs:
+      episode:
+        default: "ep01"
+  push:
+    branches: ["claude/**"]
+    paths: [".github/workflows/scene-check.yml", "music/real/candidates.json"]
+
+permissions:
+  contents: write
+
+jobs:
+  sheet:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/cache@v4
+        with:
+          path: clips
+          key: pexels-${{ hashFiles('music/real/library.json') }}
+      - name: 준비
+        env:
+          SRC: ${{ github.event_name == 'push' && 'music/real/candidates.json' || format('music/episodes/{0}.json', inputs.episode) }}
+        run: |
+          echo "SRC=$SRC" >> "$GITHUB_ENV"
+          sudo apt-get update -q && sudo apt-get install -y -q ffmpeg
+          pip install -q pillow
+          python music/real/fetch_clips.py "$SRC" clips
+      - name: 사진 만들기
+        run: python music/real/contact_sheet.py "$SRC" clips sheets
+      - name: scene-check 브랜치에 저장
+        run: |
+          mkdir -p /tmp/sh && cp sheets/*.jpg /tmp/sh/
+          git config user.name "playlist-bot"; git config user.email "actions@users.noreply.github.com"
+          git checkout -q --orphan scene-check && git rm -rqf --cached . && rm -rf sheets
+          mkdir -p sheets && cp /tmp/sh/*.jpg sheets/
+          git add sheets && git commit -qm "scene check" && git push -qf origin scene-check

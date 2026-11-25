@@ -1,0 +1,75 @@
+name: 시험곡 라운드 (작곡 → 텔레그램)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["claude/**"]
+    paths:
+      - "music/round2.json"
+      - ".github/workflows/round-compose.yml"
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  compose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        song: [r2_01_han_river_lights, r2_02_amber_glass, r2_03_after_midnight_bridge]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 디스크 공간 확보
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+      - name: ACE-Step 받기
+        run: git clone --depth 1 https://github.com/ACE-Step/ACE-Step-1.5.git ace
+      - name: 설치 (CPU 버전)
+        run: |
+          sudo apt-get update -q && sudo apt-get install -y -q ffmpeg
+          pip install -q torch==2.10.0 torchvision==0.25.0 torchaudio==2.10.0 --index-url https://download.pytorch.org/whl/cpu
+          pip install -q huggingface_hub
+          python music/setup_ace.py ace
+      - name: 모델 받기
+        run: python music/download_models.py ace/checkpoints
+      - name: 작곡
+        run: python music/test_compose.py ace out 150 "${{ matrix.song }}" music/round2.json
+      - name: 결과를 samples 브랜치에 저장
+        run: |
+          mkdir -p /tmp/s && cp out/${{ matrix.song }}/*.mp3 /tmp/s/${{ matrix.song }}.mp3
+          git config user.name "playlist-bot"; git config user.email "actions@users.noreply.github.com"
+          for i in 1 2 3 4 5 6; do
+            git fetch -q origin samples && git checkout -q -B samples origin/samples
+            mkdir -p samples && cp /tmp/s/* samples/
+            git add samples && git commit -qm "sample: ${{ matrix.song }}" && git push -q origin samples && break
+            sleep $((RANDOM % 10 + 3))
+          done
+
+  send:
+    needs: compose
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: hub_main
+      - uses: actions/checkout@v4
+        with:
+          ref: samples
+          path: s
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 텔레그램으로 보내기
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python music/send_round.py music/round2.json s/samples pl-sample-feel-2

@@ -1,0 +1,191 @@
+{
+ "id": "ep01",
+ "title": "pov: you poured a whiskey and watched the Han River until 2 a.m. | late night jazz playlist",
+ "thumb_line1": "whiskey, han river, 2 a.m.",
+ "thumb_line2": "1 hour of late night jazz",
+ "seconds": 210,
+ "crossfade": 3,
+ "songs": [
+  {
+   "slug": "r2_01_han_river_lights",
+   "title": "Han River Lights",
+   "reuse": "samples/r2_01_han_river_lights.mp3",
+   "clip": "35991482"
+  },
+  {
+   "slug": "r2_02_amber_glass",
+   "title": "Amber Glass",
+   "reuse": "samples/r2_02_amber_glass.mp3",
+   "clip": "6270171"
+  },
+  {
+   "slug": "r2_03_after_midnight_bridge",
+   "title": "After Midnight Bridge",
+   "reuse": "samples/r2_03_after_midnight_bridge.mp3",
+   "clip": "18674366"
+  },
+  {
+   "slug": "ep01_04_second_pour",
+   "title": "Second Pour",
+   "caption": "slow jazz piano ballad, solo felt piano with soft upright bass, instrumental, no vocals, steady volume, no sudden drops, late night, warm amber lamp light, whiskey, city lights over a calm river",
+   "lyrics": "[Instrumental]",
+   "bpm": 68,
+   "keyscale": "F major",
+   "instrumental": true,
+   "clip": "7255224"
+  },
+  {
+   "slug": "ep01_05_neon_on_the_water",
+   "title": "Neon on the Water",
+   "caption": "mellow jazz guitar trio, clean hollow-body guitar, brushed snare, walking bass, instrumental, no vocals, steady volume, no sudden drops, late night, warm amber lamp light, whiskey, city lights over a calm river",
+   "lyrics": "[Instrumental]",
+   "bpm": 76,
+   "keyscale": "G major",
+   "instrumental": true,
+   "clip": "37050676"
+  },
+  {
+   "slug": "ep01_06_last_call_at_the_window",
+   "title": "Last Call at the Window",
+   "caption": "muted trumpet ballad, harmon mute trumpet, rhodes chords, soft bass, instrumental, no vocals, steady volume, no sudden drops, late night, warm amber lamp light, whiskey, city lights over a calm river",
+   "lyrics": "[Instrumental]",
+   "bpm": 64,
+   "keyscale": "C minor",
+   "instrumental": true,
+   "clip": "35099181"
+  },
+  {
+   "slug": "ep01_07_ice_melting_slowly",
+   "title": "Ice Melting Slowly",
+   "caption": "vibraphone and piano duet, gentle cymbal swells, intimate lounge, instrumental, no vocals, steady volume, no sudden drops, late night, warm amber lamp light, whiskey, city lights over a calm river",
+   "lyrics": "[Instrumental]",
+   "bpm": 70,
+   "keyscale": "Ab major",
+   "instrumental": true,
+   "clip": "30211454"
+  },
+  {
+   "slug": "ep01_08_rooftop__1_a_m",
+   "title": "Rooftop, 1 A.M.",
+   "caption": "neo soul rhodes groove, warm bass, laid back lazy drums, soft guitar licks, instrumental, no vocals, steady volume, no sudden drops, late night, warm amber lamp light, whiskey, city lights over a calm river",
+   "lyrics": "[Instrumental]",
+   "bpm": 80,
+   "keyscale": "E minor",
+   "instrumental": true,
+   "clip": "32005879"
+  },
+  {
+   "slug": "ep01_09_taxi_lights_passing",
+   "title": "Taxi Lights Passing",
+   "caption": "lofi jazz hop, dusty piano chords, vinyl crackle, soft boom bap drums, instrumental, no vocals, steady volume, no sudden drops, late night, warm amber lamp light, whiskey, city lights over a calm river",
+   "lyrics": "[Instrumental]",
+   "bpm": 78,
+   "keyscale": "D minor",
+   "instrumental": true,
+   "clip": "10986155"
+  },
+  {
+   "slug": "ep01_10_quiet_bridge",
+   "title": "Quiet Bridge",
+   "caption": "solo nylon guitar jazz ballad, soft room ambience, instrumental, no vocals, steady volume, no sudden drops, late night, warm amber lamp light, whiskey, city lights over a calm river",
+   "lyrics": "[Instrumental]",
+   "bpm": 62,
+   "keyscale": "A major",
+   "instrumental": true,
+   "clip": "4604126"
+  },
+  {
+   "slug": "ep01_11_oak___smoke",
+   "title": "Oak & Smoke",
+   "caption": "tenor saxophone with piano trio, slow swing ballad, smoky bar, instrumental, no vocals, steady volume, no sudden drops, late night, warm amber lamp light, whiskey, city lights over a calm river",
+   "lyrics": "[Instrumental]",
+   "bpm": 66,
+   "keyscale": "Eb major",
+   "instrumental": true,
+   "clip": "7255133"
+  },
+  {
+   "slug": "ep01_12_riverside_bench",
+   "title": "Riverside Bench",
+   "caption": "slow bossa nova jazz, nylon guitar, light shaker, upright bass, soft flute, instrumental, no vocals, steady volume, no sudden drops, late night, warm amber lamp light, whiskey, city lights over a calm river",
+   "lyrics": "[Instrumental]",
+   "bpm": 74,
+   "keyscale": "D major",
+   "instrumental": true,
+   "clip": "11336687"
+  },
+  {
+   "slug": "ep01_13_golden_hour_was_hours_ago",
+   "title": "Golden Hour Was Hours Ago",
+   "caption": "warm rhodes and cello duet, slow and tender, instrumental, no vocals, steady volume, no sudden drops, late night, warm amber lamp light, whiskey, city lights over a calm river",
+   "lyrics": "[Instrumental]",
+   "bpm": 60,
+   "keyscale": "Bb major",
+   "instrumental": true,
+   "clip": "32537512"
+  },
+  {
+   "slug": "ep01_14_slow_ripples",
+   "title": "Slow Ripples",
+   "caption": "ambient jazz, soft piano motifs, bowed bass, gentle brushes, lots of space, instrumental, no vocals, steady volume, no sudden drops, late night, warm amber lamp light, whiskey, city lights over a calm river",
+   "lyrics": "[Instrumental]",
+   "bpm": 58,
+   "keyscale": "Gb major",
+   "instrumental": true,
+   "clip": "4565572"
+  },
+  {
+   "slug": "ep01_15_unhurried",
+   "title": "Unhurried",
+   "caption": "jazz piano trio, medium slow swing, gentle ride cymbal, instrumental, no vocals, steady volume, no sudden drops, late night, warm amber lamp light, whiskey, city lights over a calm river",
+   "lyrics": "[Instrumental]",
+   "bpm": 72,
+   "keyscale": "C major",
+   "instrumental": true,
+   "clip": "31042229"
+  },
+  {
+   "slug": "ep01_16_a_glass_half_full_of_night",
+   "title": "A Glass Half Full of Night",
+   "caption": "flugelhorn ballad, piano comping, soft bass, instrumental, no vocals, steady volume, no sudden drops, late night, warm amber lamp light, whiskey, city lights over a calm river",
+   "lyrics": "[Instrumental]",
+   "bpm": 63,
+   "keyscale": "F minor",
+   "instrumental": true,
+   "clip": "4691257"
+  },
+  {
+   "slug": "ep01_17_late_train_over_the_river",
+   "title": "Late Train Over the River",
+   "caption": "chill jazz guitar and rhodes, steady soft groove, nostalgic, instrumental, no vocals, steady volume, no sudden drops, late night, warm amber lamp light, whiskey, city lights over a calm river",
+   "lyrics": "[Instrumental]",
+   "bpm": 76,
+   "keyscale": "A minor",
+   "instrumental": true,
+   "clip": "5683159"
+  },
+  {
+   "slug": "ep01_18_lamp_still_on",
+   "title": "Lamp Still On",
+   "caption": "soft solo piano, sparse and calm, gentle sustain pedal, instrumental, no vocals, steady volume, no sudden drops, late night, warm amber lamp light, whiskey, city lights over a calm river",
+   "lyrics": "[Instrumental]",
+   "bpm": 56,
+   "keyscale": "E major",
+   "instrumental": true,
+   "clip": "3138263"
+  },
+  {
+   "slug": "ep01_19_until_the_lights_go_out",
+   "title": "Until the Lights Go Out",
+   "caption": "slowest lullaby jazz ballad, piano and soft bass, fading calm ending, instrumental, no vocals, steady volume, no sudden drops, late night, warm amber lamp light, whiskey, city lights over a calm river",
+   "lyrics": "[Instrumental]",
+   "bpm": 54,
+   "keyscale": "Db major",
+   "instrumental": true,
+   "clip": "5606315"
+  }
+ ],
+ "visual": "real",
+ "library": "music/real/library.json",
+ "check_note": "🔎 장면 19개 직접 점검 완료: 낮 장면·상표 로고·TV 화면 등 어색한 7개를 밤 분위기 장면으로 교체했어요."
+}

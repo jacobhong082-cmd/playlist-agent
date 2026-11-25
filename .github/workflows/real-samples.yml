@@ -1,0 +1,36 @@
+name: 실사 영상 샘플 (Pexels → 텔레그램)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  samples:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: hub_main
+      - uses: actions/checkout@v4
+        with:
+          ref: samples
+          path: s
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 준비
+        run: sudo apt-get update -q && sudo apt-get install -y -q ffmpeg
+      - name: 샘플 만들기
+        run: python music/real/make_samples.py music/real/clips.json s/samples/r2_01_han_river_lights.mp3 out
+      - name: 텔레그램으로 보내기
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python music/real/send_samples.py out

@@ -1,0 +1,156 @@
+name: 플레이리스트 회차 만들기 (작곡 → 영상 → 텔레그램)
+
+on:
+  workflow_dispatch:
+    inputs:
+      episode:
+        description: "회차 파일 (music/episodes/ 안)"
+        default: "ep01"
+  push:
+    branches: ["claude/**"]
+    paths:
+      - "music/episodes/ep01.json"
+
+permissions:
+  contents: write
+  actions: write
+
+env:
+  EP: ${{ github.event.inputs.episode || 'ep01' }}
+
+jobs:
+  prep:
+    runs-on: ubuntu-latest
+    outputs:
+      songs: ${{ steps.plan.outputs.songs }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: { ref: "audio-${{ env.EP }}", path: a }
+        continue-on-error: true
+      - id: plan
+        run: echo "songs=$(python3 music/plan_matrix.py music/episodes/$EP.json a/audio)" >> "$GITHUB_OUTPUT"
+      - id: cache
+        uses: actions/cache@v4
+        with:
+          path: models
+          key: ace15-turbo-nolm-v1
+      - name: 모델 한 번만 받아서 저장 (곡 작업들이 같이 씀)
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          pip install -q huggingface_hub
+          python music/download_models.py models
+
+  compose:
+    needs: prep
+    if: needs.prep.outputs.songs != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      max-parallel: 16
+      matrix:
+        song: ${{ fromJson(needs.prep.outputs.songs) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 디스크 공간 확보
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+      - name: ACE-Step 받기
+        run: git clone --depth 1 https://github.com/ACE-Step/ACE-Step-1.5.git ace
+      - uses: actions/cache/restore@v4
+        with:
+          path: models
+          key: ace15-turbo-nolm-v1
+      - name: 설치 (CPU 버전)
+        run: |
+          sudo apt-get update -q && sudo apt-get install -y -q ffmpeg
+          pip install -q torch==2.10.0 torchvision==0.25.0 torchaudio==2.10.0 --index-url https://download.pytorch.org/whl/cpu
+          pip install -q huggingface_hub
+          python music/setup_ace.py ace
+      - name: 모델 연결
+        run: |
+          if [ -d models ]; then mv models ace/checkpoints; else python music/download_models.py ace/checkpoints; fi
+      - name: 작곡
+        run: |
+          SEC=$(python3 -c "import json;print(json.load(open('music/episodes/$EP.json'))['seconds'])")
+          python music/test_compose.py ace out "$SEC" "${{ matrix.song }}" "music/episodes/$EP.json"
+      - name: 곡 저장 (episode 브랜치)
+        run: |
+          mkdir -p /tmp/s && cp out/${{ matrix.song }}/*.mp3 /tmp/s/${{ matrix.song }}.mp3
+          git config user.name "playlist-bot"; git config user.email "actions@users.noreply.github.com"
+          for i in 1 2 3 4 5 6 7 8; do
+            if git fetch -q origin "audio-$EP"; then git checkout -q -B "audio-$EP" "origin/audio-$EP"; else git checkout -q --orphan "audio-$EP"; git rm -rqf --cached . ; fi
+            mkdir -p audio && cp /tmp/s/* audio/
+            git add audio && git commit -qm "audio: ${{ matrix.song }}" && git push -q origin "audio-$EP" && break
+            sleep $((RANDOM % 15 + 3))
+          done
+
+  video:
+    needs: [prep, compose]
+    if: always() && needs.prep.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: { ref: main, path: hub_main }
+      - uses: actions/checkout@v4
+        with: { ref: "audio-${{ env.EP }}", path: a }
+        continue-on-error: true
+      - uses: actions/checkout@v4
+        with: { ref: samples, path: s }
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 준비
+        run: |
+          sudo apt-get update -q && sudo apt-get install -y -q ffmpeg
+          pip install -q pillow
+          mkdir -p songs; cp a/audio/*.mp3 songs/ 2>/dev/null || true
+          python3 - <<'PY'
+          import json, os, shutil
+          ep = json.load(open(f"music/episodes/{os.environ['EP']}.json"))
+          for s in ep["songs"]:
+              if "reuse" in s:
+                  shutil.copy(os.path.join("s", s["reuse"]), f"songs/{s['slug']}.mp3")
+          PY
+          ls songs
+      - uses: actions/cache@v4
+        with:
+          path: clips
+          key: pexels-${{ hashFiles('music/real/library.json') }}
+      - name: 실사 영상 받기 (무료 Pexels)
+        run: python music/real/fetch_clips.py music/episodes/$EP.json clips
+      - name: 영상 만들기
+        run: python music/make_video.py music/episodes/$EP.json songs out clips
+      - name: 완성본 보관 (Actions 보관함, 90일)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.EP }}-video
+          path: |
+            out/video.mp4
+            out/thumb.jpg
+            out/description.txt
+            out/meta.json
+            out/scenes.jpg
+            out/preview.mp4
+          compression-level: 0
+          retention-days: 90
+      - id: rel
+        run: echo "url=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> "$GITHUB_OUTPUT"
+      - name: 텔레그램 미리보기 + 승인 버튼
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python music/send_episode.py out "${{ steps.rel.outputs.url }}" "${{ github.run_id }}"
+      - name: 실패 알림
+        if: failure()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          cd hub_main/hub && python -c "import secretary as s; s.fail('playlist', '플레이리스트 영상 만들기', '영상 단계에서 오류가 났어요. Claude가 확인 중이에요.')"

@@ -1,0 +1,38 @@
+name: 시험곡 텔레그램으로 보내기
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["claude/**"]
+    paths:
+      - ".github/workflows/send-samples.yml"
+      - "music/send_samples.py"
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: hub_main
+      - uses: actions/checkout@v4
+        with:
+          ref: samples
+          path: s
+      - run: cp -r s/samples samples
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 보내기
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python music/send_samples.py
