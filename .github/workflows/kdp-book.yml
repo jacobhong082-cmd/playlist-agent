@@ -21,6 +21,7 @@ concurrency:
 
 permissions:
   contents: write   # hub/state 의 출간 기록·승인 대기 목록
+  actions: write    # 승인 요청 때 비서실 '듣기 모드'를 켜서 버튼 반응을 빠르게
 
 jobs:
   book:
