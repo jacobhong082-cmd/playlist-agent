@@ -126,15 +126,21 @@ jobs:
         run: python music/real/fetch_clips.py music/episodes/$EP.json clips
       - name: 영상 만들기
         run: python music/make_video.py music/episodes/$EP.json songs out clips
-      - name: 완성본 보관 (GitHub 릴리스)
-        id: rel
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          TAG="$EP-$(date -u +%Y%m%d-%H%M)"
-          gh release create "$TAG" out/video.mp4 out/thumb.jpg out/description.txt out/meta.json $(ls out/scenes.jpg 2>/dev/null) \
-            --target "${{ github.sha }}" --title "$EP" --notes "자동 생성된 플레이리스트 회차 (아직 업로드 전)" --prerelease
-          echo "url=https://github.com/${{ github.repository }}/releases/tag/$TAG" >> "$GITHUB_OUTPUT"
+      - name: 완성본 보관 (Actions 보관함, 90일)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.EP }}-video
+          path: |
+            out/video.mp4
+            out/thumb.jpg
+            out/description.txt
+            out/meta.json
+            out/scenes.jpg
+            out/preview.mp4
+          compression-level: 0
+          retention-days: 90
+      - id: rel
+        run: echo "url=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> "$GITHUB_OUTPUT"
       - name: 텔레그램 미리보기 + 승인 버튼
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
