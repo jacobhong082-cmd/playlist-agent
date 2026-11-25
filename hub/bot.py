@@ -167,10 +167,19 @@ def record_decision(key: str, choice: str) -> dict | None:
     return item
 
 
+def answer(cb: dict, text: str) -> None:
+    """버튼 누른 곳에 잠깐 뜨는 안내. 텔레그램은 몇 초 안에만 받아 주므로,
+    5분마다 확인하는 방식에선 대부분 시간이 지나 거절돼요. 그래도 처리는 계속합니다."""
+    try:
+        s.tg("answerCallbackQuery", {"callback_query_id": cb["id"], "text": text[:190]})
+    except RuntimeError:
+        pass
+
+
 def handle_callback(cb: dict) -> None:
     data = cb.get("data", "")
     if not owner_ok(cb.get("from", {}).get("id")):
-        s.tg("answerCallbackQuery", {"callback_query_id": cb["id"], "text": "주인만 누를 수 있어요"})
+        answer(cb, "주인만 누를 수 있어요")
         return
     parts = data.split("|")
     toast, result = "처리했어요", None
@@ -209,7 +218,7 @@ def handle_callback(cb: dict) -> None:
         toast = "오늘은 쉬어요"
     elif parts[0] == "p":  # 승인 대기 목록에서 바로 처리
         return handle_callback({**cb, "data": "a|" + "|".join(parts[1:])})
-    s.tg("answerCallbackQuery", {"callback_query_id": cb["id"], "text": toast[:190]})
+    answer(cb, toast)
     if result:
         mark_message(cb, result)
 
