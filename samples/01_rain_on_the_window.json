@@ -1,0 +1,17 @@
+{
+  "device": "cpu",
+  "duration_s": 150.0,
+  "songs": [
+    {
+      "slug": "01_rain_on_the_window",
+      "success": true,
+      "error": null,
+      "files": [
+        "/home/runner/work/playlist-agent/playlist-agent/out/01_rain_on_the_window/b5924bc1-15a5-ecd6-7a4e-8f691304f34c.mp3"
+      ],
+      "seconds": 995.5
+    }
+  ],
+  "init_result": "('[OK] Model initialized successfully on cpu\\nMain model: /home/runner/work/playlist-agent/playlist-agent/ace/checkpoints/acestep-v15-turbo\\nVAE: /home/runner/work/playlist-agent/playlist-agent/ace/checkpoints/vae\\nText encoder: /home/runner/work/playlist-agent/playlist-agent/ace/checkpoints/Qwen3-Embedding-0.6B\\nDtype: torch.float32\\nAttention: sdpa\\nCompiled: False\\nQuantization: Disabled\\nOffload to CPU: False\\nOffload DiT to CPU: False\\nMLX DiT: Unavailable (PyTorch fallback)\\nMLX VAE: Unava",
+  "load_seconds": 30.9
+}
