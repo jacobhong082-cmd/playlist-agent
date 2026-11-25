@@ -1,0 +1,14 @@
+[
+  {"slug": "r2_01_han_river_lights", "title": "Han River Lights",
+   "desc": "재즈 피아노 트리오 · 한강 야경 · 72 BPM",
+   "caption": "late night smoky jazz piano trio instrumental, warm felt piano, soft upright bass, brushed drums, whiskey bar ambience, city lights reflecting on a calm river at night, dim amber lamp light, intimate, slow and relaxed, steady volume, no vocals",
+   "lyrics": "[Instrumental]", "bpm": 72, "keyscale": "Db major", "instrumental": true},
+  {"slug": "r2_02_amber_glass", "title": "Amber Glass",
+   "desc": "색소폰 발라드 · 노란 조명 · 66 BPM",
+   "caption": "mellow tenor saxophone jazz ballad instrumental, breathy sax melody, warm rhodes electric piano chords, soft upright bass, gentle brushes, whiskey glass at midnight, golden lamp light, nostalgic and calm, lounge, no vocals",
+   "lyrics": "[Instrumental]", "bpm": 66, "keyscale": "Bb major", "instrumental": true},
+  {"slug": "r2_03_after_midnight_bridge", "title": "After Midnight Bridge",
+   "desc": "네오소울 기타 · 다리 위 불빛 · 78 BPM",
+   "caption": "neo soul jazz instrumental, clean warm electric guitar, rhodes piano, deep soft bass, laid back drums, quiet bridge lights over a river after midnight, cozy apartment with yellow lamp, chill and smooth, steady, no vocals",
+   "lyrics": "[Instrumental]", "bpm": 78, "keyscale": "Eb major", "instrumental": true}
+]

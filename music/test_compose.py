@@ -6,6 +6,7 @@ from pathlib import Path
 
 ace, out, dur = Path(sys.argv[1]).resolve(), Path(sys.argv[2]).resolve(), float(sys.argv[3])
 only = sys.argv[4] if len(sys.argv) > 4 else ""
+songs_file = str(Path(sys.argv[5]).resolve()) if len(sys.argv) > 5 else ""
 out.mkdir(parents=True, exist_ok=True)
 os.environ.setdefault("ACESTEP_INIT_LLM", "false")
 os.chdir(ace)
@@ -35,6 +36,9 @@ SONGS = [
         "bpm": 78, "keyscale": "A minor", "instrumental": True,
     },
 ]
+
+if songs_file:
+    SONGS = json.loads(Path(songs_file).read_text())
 
 log = {"device": "cpu", "duration_s": dur, "songs": []}
 t0 = time.time()

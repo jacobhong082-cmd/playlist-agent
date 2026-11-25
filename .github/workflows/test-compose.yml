@@ -6,11 +6,6 @@ on:
       seconds:
         description: "곡 길이(초)"
         default: "150"
-  push:
-    branches: ["claude/**"]
-    paths:
-      - "music/**"
-      - ".github/workflows/test-compose.yml"
 
 permissions:
   contents: write
