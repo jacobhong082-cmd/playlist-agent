@@ -5,25 +5,31 @@ on:
     inputs:
       seconds:
         description: "곡 길이(초)"
-        default: "60"
+        default: "150"
   push:
+    branches: ["claude/**"]
     paths:
       - "music/**"
       - ".github/workflows/test-compose.yml"
+
+permissions:
+  contents: write
 
 jobs:
   compose:
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        song: [01_rain_on_the_window, 02_last_bus_home]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - name: 디스크 공간 확보
-        run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
-          df -h /
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
       - name: ACE-Step 받기
         run: git clone --depth 1 https://github.com/ACE-Step/ACE-Step-1.5.git ace
       - name: 설치 (CPU 버전)
@@ -35,9 +41,15 @@ jobs:
       - name: 모델 받기
         run: python music/download_models.py ace/checkpoints
       - name: 작곡
-        run: python music/test_compose.py ace out "${{ github.event.inputs.seconds || '60' }}"
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-songs
-          path: out/
+        run: python music/test_compose.py ace out "${{ github.event.inputs.seconds || '150' }}" "${{ matrix.song }}"
+      - name: 결과를 samples 브랜치에 저장
+        run: |
+          mkdir -p /tmp/s && cp out/${{ matrix.song }}/*.mp3 /tmp/s/${{ matrix.song }}.mp3 && cp out/result.json /tmp/s/${{ matrix.song }}.json
+          git config user.name "playlist-bot"; git config user.email "actions@users.noreply.github.com"
+          for i in 1 2 3 4 5; do
+            git fetch origin samples && git checkout -B samples origin/samples || git checkout --orphan samples
+            git rm -rqf --cached . >/dev/null 2>&1 || true
+            mkdir -p samples && cp /tmp/s/* samples/
+            git add samples && git commit -qm "sample: ${{ matrix.song }}" && git push origin samples && break
+            sleep $((RANDOM % 10 + 3))
+          done

@@ -5,6 +5,7 @@ import json, os, sys, time, traceback
 from pathlib import Path
 
 ace, out, dur = Path(sys.argv[1]).resolve(), Path(sys.argv[2]).resolve(), float(sys.argv[3])
+only = sys.argv[4] if len(sys.argv) > 4 else ""
 out.mkdir(parents=True, exist_ok=True)
 os.environ.setdefault("ACESTEP_INIT_LLM", "false")
 os.chdir(ace)
@@ -45,6 +46,8 @@ print("model loaded in", log["load_seconds"], "s:", log["init_result"], flush=Tr
 llm = LLMHandler()  # 작사 도우미는 끔 (CPU 절약)
 
 for s in SONGS:
+    if only and s["slug"] != only:
+        continue
     t = time.time()
     entry = {"slug": s["slug"]}
     try:
