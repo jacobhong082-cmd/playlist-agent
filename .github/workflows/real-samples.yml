@@ -9,7 +9,7 @@ on:
       - ".github/workflows/real-samples.yml"
 
 permissions:
-  contents: read
+  contents: write
   actions: write
 
 jobs:
