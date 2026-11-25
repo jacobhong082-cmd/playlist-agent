@@ -2,11 +2,6 @@ name: 실사 영상 샘플 (Pexels → 텔레그램)
 
 on:
   workflow_dispatch:
-  push:
-    branches: ["claude/**"]
-    paths:
-      - "music/real/**"
-      - ".github/workflows/real-samples.yml"
 
 permissions:
   contents: write
