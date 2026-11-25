@@ -7,11 +7,11 @@
       "success": true,
       "error": null,
       "files": [
-        "/home/runner/work/playlist-agent/playlist-agent/out/02_last_bus_home/328e52e3-6c7a-1f02-5854-535665bb113d.mp3"
+        "/home/runner/work/playlist-agent/playlist-agent/out/02_last_bus_home/ea76df92-8059-cdc8-a324-6212b0e119f5.mp3"
       ],
-      "seconds": 989.4
+      "seconds": 529.9
     }
   ],
   "init_result": "('[OK] Model initialized successfully on cpu\\nMain model: /home/runner/work/playlist-agent/playlist-agent/ace/checkpoints/acestep-v15-turbo\\nVAE: /home/runner/work/playlist-agent/playlist-agent/ace/checkpoints/vae\\nText encoder: /home/runner/work/playlist-agent/playlist-agent/ace/checkpoints/Qwen3-Embedding-0.6B\\nDtype: torch.float32\\nAttention: sdpa\\nCompiled: False\\nQuantization: Disabled\\nOffload to CPU: False\\nOffload DiT to CPU: False\\nMLX DiT: Unavailable (PyTorch fallback)\\nMLX VAE: Unava",
-  "load_seconds": 34.4
+  "load_seconds": 25.1
 }
