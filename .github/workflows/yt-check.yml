@@ -1,0 +1,39 @@
+name: 유튜브 연결 확인 (올리지 않음)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["claude/**"]
+    paths: ["music/yt-check.txt"]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -q requests
+      - name: 토큰 · 채널 · 권한 확인
+        env:
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os, sys, requests
+          for k in ("GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "GOOGLE_REFRESH_TOKEN"):
+              print(k, "set" if os.environ.get(k, "").strip() else "MISSING")
+          sys.path.insert(0, "hub")
+          import youtube
+          t = youtube.token()
+          info = requests.get("https://oauth2.googleapis.com/tokeninfo", params={"access_token": t}, timeout=30).json()
+          print("scopes:", info.get("scope"))
+          r = requests.get(youtube.YT + "/channels", params={"part": "snippet,status", "mine": "true"},
+                           headers={"Authorization": f"Bearer {t}"}, timeout=30)
+          print("channels status", r.status_code)
+          for c in r.json().get("items", []):
+              print("channel:", c["snippet"]["title"], "| longUploads:", c.get("status", {}).get("longUploadsStatus"))
+          r.raise_for_status()
+          PY
