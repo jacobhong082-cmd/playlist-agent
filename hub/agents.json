@@ -1,0 +1,71 @@
+{
+ "_설명": "📋 현황 버튼에 나오는 목록. 새 에이전트를 만들면 여기에 한 줄 추가하면 됩니다. paused=true 면 '잠시 멈춤'으로 표시.",
+ "kdp_royalty_per_book": null,
+ "_kdp_설명": "책 한 권당 로열티(달러). 가격이 정해지면 숫자로 바꾸면 성적표에 로열티가 자동 계산돼요.",
+ "agents": [
+  {
+   "group": "🎵 플레이리스트",
+   "name": "작곡 테스트",
+   "repo": "playlist-agent",
+   "workflow": "test-compose.yml"
+  },
+  {
+   "group": "📚 KDP",
+   "name": "'마실' 출간 준비",
+   "repo": "",
+   "workflow": "",
+   "paused": false,
+   "manual": "수동 진행 중"
+  },
+  {
+   "group": "📈 주식",
+   "name": "📰 시황 브리핑",
+   "repo": "stock-agent",
+   "workflow": "daily-briefing.yml"
+  },
+  {
+   "group": "📈 주식",
+   "name": "🚨 장중 급변 알림",
+   "repo": "stock-agent",
+   "workflow": "alerts.yml"
+  },
+  {
+   "group": "📈 주식",
+   "name": "🤖 트레이더(모의)",
+   "repo": "stock-agent",
+   "workflow": "trader.yml"
+  },
+  {
+   "group": "📈 주식",
+   "name": "📅 내일 일정 알림",
+   "repo": "stock-agent",
+   "workflow": "earnings.yml"
+  },
+  {
+   "group": "📈 주식",
+   "name": "📊 주간 리포트",
+   "repo": "stock-agent",
+   "workflow": "weekly.yml"
+  },
+  {
+   "group": "🗂 비서실",
+   "name": "📊 주간 성적표",
+   "repo": "playlist-agent",
+   "workflow": "weekly-report.yml"
+  },
+  {
+   "group": "💤 잠시 멈춤",
+   "name": "AI K-pop 그룹",
+   "repo": "",
+   "workflow": "",
+   "paused": true
+  },
+  {
+   "group": "💤 잠시 멈춤",
+   "name": "AI 창업 정보 채널",
+   "repo": "",
+   "workflow": "",
+   "paused": true
+  }
+ ]
+}
