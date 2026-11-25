@@ -151,7 +151,7 @@ JSON 하나로만 답해:
 
 # ---------------------------------------------------------------- 목소리 답 (무료)
 def speak(text: str) -> str | None:
-    """무료 Edge 음성으로 읽어서 텔레그램 음성(ogg) 파일 경로를 돌려줌. 실패하면 None (글 답은 그대로 감)."""
+    """무료 Edge 음성으로 읽어서 텔레그램 음성(ogg 또는 mp3) 파일 경로를 돌려줌. 실패하면 None (글 답은 그대로 감)."""
     try:
         try:
             import edge_tts  # noqa: F401
@@ -161,9 +161,13 @@ def speak(text: str) -> str | None:
         mp3, ogg = f"{d}/a.mp3", f"{d}/a.ogg"
         subprocess.run([sys.executable, "-m", "edge_tts", "--voice", VOICE, "--text", text, "--write-media", mp3],
                        check=True, capture_output=True, timeout=60)
-        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", mp3, "-c:a", "libopus", "-b:a", "32k", ogg],
-                       check=True, capture_output=True, timeout=60)
-        return ogg
+        # 텔레그램 음성 메시지는 mp3도 받아요. ffmpeg가 있으면 더 가벼운 ogg로 바꿔요.
+        try:
+            subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", mp3, "-c:a", "libopus", "-b:a", "32k", ogg],
+                           check=True, capture_output=True, timeout=60)
+            return ogg
+        except (FileNotFoundError, subprocess.CalledProcessError):
+            return mp3
     except Exception as e:
         print(f"(목소리 만들기 실패: {type(e).__name__}: {str(e)[:150]})")
         return None
