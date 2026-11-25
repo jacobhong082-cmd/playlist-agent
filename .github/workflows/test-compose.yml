@@ -1,0 +1,43 @@
+name: 시험 작곡 (ACE-Step, CPU)
+
+on:
+  workflow_dispatch:
+    inputs:
+      seconds:
+        description: "곡 길이(초)"
+        default: "60"
+  push:
+    paths:
+      - "music/**"
+      - ".github/workflows/test-compose.yml"
+
+jobs:
+  compose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 디스크 공간 확보
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h /
+      - name: ACE-Step 받기
+        run: git clone --depth 1 https://github.com/ACE-Step/ACE-Step-1.5.git ace
+      - name: 설치 (CPU 버전)
+        run: |
+          sudo apt-get update -q && sudo apt-get install -y -q ffmpeg
+          pip install -q torch==2.10.0 torchvision==0.25.0 torchaudio==2.10.0 --index-url https://download.pytorch.org/whl/cpu
+          pip install -q huggingface_hub
+          python music/setup_ace.py ace
+      - name: 모델 받기
+        run: python music/download_models.py ace/checkpoints
+      - name: 작곡
+        run: python music/test_compose.py ace out "${{ github.event.inputs.seconds || '60' }}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-songs
+          path: out/
