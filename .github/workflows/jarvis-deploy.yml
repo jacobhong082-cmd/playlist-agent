@@ -70,8 +70,8 @@ jobs:
           print("자비스 대답:", ans)
           text = ("🎙 <b>자비스 설치 완료</b>\n\n"
                   f"시험 질문 '지금 현황 짧게 알려줘'에 대한 대답:\n<i>{ans}</i>\n\n"
-                  "아래 주소를 꾹 눌러 복사해서, 단축어의 'URL' 칸에 붙여 넣으세요. (끝의 q= 뒤에 '받아쓴 텍스트'를 넣어요)\n\n"
-                  f"<code>{url}/ask?k={k}&amp;q=</code>")
+                  "아래 주소를 꾹 눌러 복사해서, 단축어의 'URL 콘텐츠 가져오기' 주소 칸에 붙여 넣으세요.\n\n"
+                  f"<code>{url}/ask?k={k}</code>")
           body = json.dumps({"chat_id": os.environ["TELEGRAM_CHAT_ID"], "text": text, "parse_mode": "HTML"}).encode()
           req = urllib.request.Request(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_TOKEN']}/sendMessage",
                                        body, {"Content-Type": "application/json"})
