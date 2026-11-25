@@ -1,0 +1,48 @@
+name: 📚 KDP 주간 책 만들기
+
+on:
+  schedule:
+    - cron: "0 1 * * 0"     # 매주 일요일 10:00 (한국 시간). 공개 저장소라 무료
+  workflow_dispatch:
+    inputs:
+      book:
+        description: "책 id (비워 두면 이번 주 책)"
+        default: ""
+      redo:
+        description: "다시 만든 횟수"
+        default: "0"
+      choice:
+        description: "버튼 결과 (approve/redo/drop/posted/later). 비워 두면 주간 실행"
+        default: ""
+
+concurrency:
+  group: kdp-book
+  cancel-in-progress: false
+
+permissions:
+  contents: write   # hub/state 의 출간 기록·승인 대기 목록
+
+jobs:
+  book:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pillow==11.3.0
+      - name: 책 만들기 / 버튼 처리
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GITHUB_TOKEN: ${{ github.token }}
+          BOOK: ${{ inputs.book }}
+          REDO: ${{ inputs.redo }}
+          CHOICE: ${{ inputs.choice }}
+        run: |
+          if [ -n "$CHOICE" ]; then
+            python kdp/run.py choice --book "$BOOK" --redo "${REDO:-0}" --choice "$CHOICE"
+          else
+            python kdp/run.py weekly
+          fi

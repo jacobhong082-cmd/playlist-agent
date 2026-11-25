@@ -1,0 +1,7 @@
+{
+ "_설명": "매주 일요일 이 순서대로 다음 책 1권을 만들어요. 낱말·설정 파일은 kdp/wordbanks/<id>.json. KDP 규칙상 한 주에 새 책은 형식별 2권까지.",
+ "order": [
+  "taste-of-korea-1",
+  "korean-patchwork-1"
+ ]
+}
