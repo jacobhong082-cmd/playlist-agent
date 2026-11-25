@@ -5,6 +5,9 @@ on:
     inputs:
       episode:
         default: "ep01"
+  push:
+    branches: ["claude/**"]
+    paths: [".github/workflows/scene-check.yml", "music/real/library.json"]
 
 permissions:
   contents: write
@@ -26,9 +29,9 @@ jobs:
         run: |
           sudo apt-get update -q && sudo apt-get install -y -q ffmpeg
           pip install -q pillow
-          python music/real/fetch_clips.py music/episodes/${{ inputs.episode }}.json clips
+          python music/real/fetch_clips.py music/episodes/${{ inputs.episode || 'ep01' }}.json clips
       - name: 사진 만들기
-        run: python music/real/contact_sheet.py music/episodes/${{ inputs.episode }}.json clips sheets
+        run: python music/real/contact_sheet.py music/episodes/${{ inputs.episode || 'ep01' }}.json clips sheets
       - name: scene-check 브랜치에 저장
         run: |
           mkdir -p /tmp/sh && cp sheets/*.jpg /tmp/sh/
