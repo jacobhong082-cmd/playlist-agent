@@ -1,0 +1,81 @@
+name: 자비스 설치 (시리용 무료 Cloudflare Worker)
+
+# 한 번만 실행하면 돼요. 끝나면 텔레그램 비서실로 '단축어에 붙여 넣을 주소'가 와요.
+# 필요한 비밀값: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, GEMINI_API_KEY (+ 이미 있는 텔레그램 값)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["jarvis/**"]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: jarvis
+      - name: 단축어 암호 만들기 (봇 열쇠에서 계산, 다시 설치해도 같은 값)
+        id: key
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: |
+          k=$(printf '%s' "jarvis:${TELEGRAM_BOT_TOKEN}" | sha256sum | cut -c1-20)
+          echo "::add-mask::$k"
+          echo "k=$k" >> "$GITHUB_OUTPUT"
+      - name: Cloudflare 에 올리기
+        id: cf
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: jarvis
+          secrets: |
+            JARVIS_KEY
+            GEMINI_API_KEY
+            TELEGRAM_BOT_TOKEN
+            TELEGRAM_CHAT_ID
+            GH_TOKEN
+        env:
+          JARVIS_KEY: ${{ steps.key.outputs.k }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GH_TOKEN: ${{ secrets.STOCK_ACTIONS_TOKEN }}
+      - name: 직접 물어보고 결과를 텔레그램으로 보내기
+        env:
+          URL: ${{ steps.cf.outputs.deployment-url }}
+          K: ${{ steps.key.outputs.k }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 - <<'PY'
+          import html, json, os, time, urllib.parse, urllib.request
+          url = os.environ["URL"].rstrip("/")
+          k = os.environ["K"]
+          q = urllib.parse.quote("지금 현황 짧게 알려줘")
+          ans = "(대답 없음)"
+          for i in range(4):  # 막 올린 직후엔 몇 초 걸릴 수 있음
+              try:
+                  with urllib.request.urlopen(f"{url}/ask?k={k}&q={q}", timeout=40) as r:
+                      ans = r.read().decode()
+                  break
+              except Exception as e:
+                  ans = f"(오류: {e})"
+                  time.sleep(5)
+          print("자비스 대답:", ans)
+          text = ("🎙 <b>자비스 설치 완료</b>\n\n"
+                  f"시험 질문 '지금 현황 짧게 알려줘'에 대한 대답:\n<i>{html.escape(ans)}</i>\n\n"
+                  "아래 주소를 꾹 눌러 복사해서, 단축어의 'URL 콘텐츠 가져오기' 주소 칸에 붙여 넣으세요.\n\n"
+                  f"<code>{url}/ask?k={k}</code>")
+          body = json.dumps({"chat_id": os.environ["TELEGRAM_CHAT_ID"], "text": text, "parse_mode": "HTML"}).encode()
+          req = urllib.request.Request(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_TOKEN']}/sendMessage",
+                                       body, {"Content-Type": "application/json"})
+          urllib.request.urlopen(req, timeout=30)
+          if ans.startswith("(") or "못 만들었어요" in ans:
+              raise SystemExit("자비스가 제대로 대답하지 않았어요")
+          PY

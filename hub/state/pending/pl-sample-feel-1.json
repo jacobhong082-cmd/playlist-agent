@@ -1,0 +1,24 @@
+{
+ "key": "pl-sample-feel-1",
+ "agent": "playlist",
+ "title": "시험곡 2개 어땠어요?",
+ "asked": 1795611168.4244468,
+ "message_id": 137,
+ "reminded": false,
+ "buttons": [
+  [
+   "👍 좋아",
+   "good"
+  ],
+  [
+   "🌙 더 잔잔하게",
+   "calmer"
+  ],
+  [
+   "🎹 보컬 빼고",
+   "novocal"
+  ]
+ ],
+ "on_choice": null,
+ "repo": "jacobhong082-cmd/playlist-agent"
+}
