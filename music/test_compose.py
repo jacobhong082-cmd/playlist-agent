@@ -39,6 +39,8 @@ SONGS = [
 
 if songs_file:
     SONGS = json.loads(Path(songs_file).read_text())
+    if isinstance(SONGS, dict):
+        SONGS = SONGS["songs"]
 
 log = {"device": "cpu", "duration_s": dur, "songs": []}
 t0 = time.time()
