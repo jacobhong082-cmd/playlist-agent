@@ -32,7 +32,7 @@
    "bpm": 68,
    "keyscale": "F major",
    "instrumental": true,
-   "clip": "13610011"
+   "clip": "7255224"
   },
   {
    "slug": "ep01_05_neon_on_the_water",
@@ -82,7 +82,7 @@
    "bpm": 78,
    "keyscale": "D minor",
    "instrumental": true,
-   "clip": "31176873"
+   "clip": "10986155"
   },
   {
    "slug": "ep01_10_quiet_bridge",
@@ -92,7 +92,7 @@
    "bpm": 62,
    "keyscale": "A major",
    "instrumental": true,
-   "clip": "4192175"
+   "clip": "4604126"
   },
   {
    "slug": "ep01_11_oak___smoke",
@@ -142,7 +142,7 @@
    "bpm": 72,
    "keyscale": "C major",
    "instrumental": true,
-   "clip": "36207172"
+   "clip": "31042229"
   },
   {
    "slug": "ep01_16_a_glass_half_full_of_night",
@@ -152,7 +152,7 @@
    "bpm": 63,
    "keyscale": "F minor",
    "instrumental": true,
-   "clip": "10317805"
+   "clip": "4691257"
   },
   {
    "slug": "ep01_17_late_train_over_the_river",
@@ -162,7 +162,7 @@
    "bpm": 76,
    "keyscale": "A minor",
    "instrumental": true,
-   "clip": "3882891"
+   "clip": "5683159"
   },
   {
    "slug": "ep01_18_lamp_still_on",
@@ -172,7 +172,7 @@
    "bpm": 56,
    "keyscale": "E major",
    "instrumental": true,
-   "clip": "4231452"
+   "clip": "3138263"
   },
   {
    "slug": "ep01_19_until_the_lights_go_out",
@@ -186,5 +186,6 @@
   }
  ],
  "visual": "real",
- "library": "music/real/library.json"
+ "library": "music/real/library.json",
+ "check_note": "🔎 장면 19개 직접 점검 완료: 낮 장면·상표 로고·TV 화면 등 어색한 7개를 밤 분위기 장면으로 교체했어요."
 }

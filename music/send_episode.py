@@ -16,6 +16,8 @@ assert r.get("ok"), r
 print("sent preview message_id", r["result"]["message_id"])
 tracks = "\n".join(f"{t['start'] // 60}:{t['start'] % 60:02d} {t['title']}" for t in meta["tracks"])
 body = f"{meta['title']}\n\n{tracks}"
+if meta.get("check_note"):
+    body = meta["check_note"] + "\n\n" + body
 if meta.get("missing"):
     body += f"\n\n⚠️ 빠진 곡: {', '.join(meta['missing'])}"
 if rel:

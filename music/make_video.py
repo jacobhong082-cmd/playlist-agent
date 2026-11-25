@@ -132,7 +132,7 @@ def write_meta(ep, tracks, starts, total, missing, out):
     (out / "description.txt").write_text(desc)
     meta = {"id": ep["id"], "title": ep["title"], "description": desc, "duration": round(total),
             "tracks": [{"title": tr["title"], "start": round(st), "slug": tr["slug"]} for tr, st in zip(tracks, starts)],
-            "missing": missing, "ai": True, "made_for_kids": False}
+            "missing": missing, "check_note": ep.get("check_note", ""), "ai": True, "made_for_kids": False}
     (out / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1))
     for p in ["video.mp4", "preview.mp4", "thumb.jpg"]:
         print(p, f"{(out / p).stat().st_size / 1e6:.1f} MB", flush=True)
