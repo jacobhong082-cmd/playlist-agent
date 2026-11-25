@@ -185,22 +185,24 @@ def handle_callback(cb: dict) -> None:
     toast, result = "처리했어요", None
     if parts[0] == "a" and len(parts) == 3:
         key, choice = parts[1], parts[2]
+        label = s.CHOICE_LABEL.get(choice, choice)
         if s.decision(key):
             toast = "이미 처리된 요청이에요"
         else:
+            answer(cb, f"{label} 접수됐어요")
+            toast = None
             item = record_decision(key, choice)
-            label = s.CHOICE_LABEL.get(choice, choice)
             result = f"{label} · {kst(time.time())}"
             oc = (item or {}).get("on_choice")
             if oc and oc.get("workflow"):
                 ok, why = dispatch(oc.get("repo") or item.get("repo") or s.HUB_REPO, oc["workflow"],
                                    {**(oc.get("inputs") or {}), "choice": choice})
                 result += " · 다음 단계 시작" if ok else f" · ⚠️ {why}"
-            toast = label
     elif parts[0] == "r" and len(parts) == 3:
+        answer(cb, "🔁 접수됐어요. 다시 실행할게요")
+        toast = None
         ok, why = dispatch(parts[1], parts[2])
         result = ("🔁 다시 실행 시작 · " if ok else f"⚠️ {why} · ") + kst(time.time())
-        toast = "다시 실행했어요" if ok else "실행하지 못했어요"
     elif parts[0] == "k" and len(parts) == 3:
         week, val = parts[1], parts[2]
         if val == "more":
@@ -210,15 +212,17 @@ def handle_callback(cb: dict) -> None:
                                             "reply_markup": {"inline_keyboard": kdp_keyboard(week, big=True)}})
             toast = "20권 이상"
         else:
+            answer(cb, f"📚 {val}권 접수됐어요")
+            toast = None
             save_kdp(week, int(val))
             result = f"📚 {week[5:].replace('-', '/')}~ 주 KDP {val}권 기록 완료"
-            toast = f"{val}권 기록"
     elif parts[0] == "x":
         result = "🔕 알겠어요. 오늘은 그대로 둘게요."
         toast = "오늘은 쉬어요"
     elif parts[0] == "p":  # 승인 대기 목록에서 바로 처리
         return handle_callback({**cb, "data": "a|" + "|".join(parts[1:])})
-    answer(cb, toast)
+    if toast:
+        answer(cb, toast)
     if result:
         mark_message(cb, result)
 
@@ -324,7 +328,7 @@ def remind_pending() -> None:
 def main() -> None:
     if "--hello" in sys.argv:  # 설치 확인용: 메뉴 버튼 + 시험 승인 요청
         reply("🗂 <b>비서실</b> 연결 완료!\n이제 모든 에이전트의 보고와 결재가 여기로 와요. 아래 버튼만 누르면 돼요.", menu=True)
-        s.ask("hub", "hello-test", "시험 승인 요청이에요", "아무 버튼이나 눌러 보세요. 5분 안에 결과가 이 메시지에 표시돼요.",
+        s.ask("hub", f"hello-{int(time.time())}", "시험 승인 요청이에요", "아무 버튼이나 눌러 보세요. 바로 '접수됐어요'가 뜨고 결과가 이 메시지에 붙어요.",
               buttons=[("👍 잘 보여요", "approve"), ("👎 이상해요", "drop")])
         return
     if "--voice-test" in sys.argv:  # 자비스 시험: 시세 + 목소리 (AI 없이)
@@ -346,29 +350,57 @@ def main() -> None:
     if not token or not chat:
         print("TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID 비밀값이 아직 없어요. 설정 전이라 조용히 끝냅니다.")
         return
+    # 웹훅(예: Cloudflare Worker)이 텔레그램 소식 하나를 넘겨준 경우: 그것만 처리
+    raw = (os.environ.get("UPDATE_JSON") or "").strip()
+    if raw:
+        u = json.loads(raw)
+        if "callback_query" in u:
+            handle_callback(u["callback_query"])
+        elif "message" in u:
+            handle_text(u["message"])
+        print("넘겨받은 소식 1개 처리")
+        return
+    # 듣기 모드: 그 시간 동안은 버튼을 누르자마자 바로 반응 (텔레그램 '롱폴링')
+    listen = 0.0
+    for a in sys.argv:
+        if a.startswith("--listen="):
+            listen = float(a.split("=")[1] or 0)
+    start = time.time()
+    deadline = start + listen * 60
+    cap = start + 25 * 60  # 한 번에 최대 25분
     off, sha = s.state_get("offset", {"offset": 0})
     offset = (off or {}).get("offset", 0)
-    try:
-        res = s.tg("getUpdates", {"offset": offset, "timeout": 0,
-                                  "allowed_updates": ["message", "callback_query"]})
-    except RuntimeError as e:
-        if "409" in str(e):
-            sys.exit("이 봇에 웹훅이 걸려 있어 버튼을 읽을 수 없어요 (deleteWebhook 필요)")
-        raise
-    updates = res.get("result", [])
-    print(f"새 소식 {len(updates)}개")
-    for u in updates:
+    total = 0
+    while True:
+        wait = int(max(0, min(50, deadline - time.time())))
         try:
-            if "callback_query" in u:
-                handle_callback(u["callback_query"])
-            elif "message" in u:
-                handle_text(u["message"])
-        except Exception as e:  # 하나가 실패해도 나머지는 처리
-            print(f"(처리 실패 {u.get('update_id')}: {type(e).__name__}: {e})")
-    if updates:
-        s.state_put("offset", {"offset": updates[-1]["update_id"] + 1}, sha, "비서실: 읽은 위치")
+            res = s.tg("getUpdates", {"offset": offset, "timeout": wait,
+                                      "allowed_updates": ["message", "callback_query"]}, timeout=wait + 20)
+        except RuntimeError as e:
+            if "409" in str(e):
+                print("(다른 확인 작업이 같은 봇을 읽는 중이라 이번엔 건너뜀)")
+                break
+            raise
+        updates = res.get("result", [])
+        for u in updates:
+            try:
+                if "callback_query" in u:
+                    handle_callback(u["callback_query"])
+                elif "message" in u:
+                    handle_text(u["message"])
+            except Exception as e:  # 하나가 실패해도 나머지는 처리
+                print(f"(처리 실패 {u.get('update_id')}: {type(e).__name__}: {e})")
+        if updates:
+            total += len(updates)
+            offset = updates[-1]["update_id"] + 1
+            s.state_put("offset", {"offset": offset}, sha, "비서실: 읽은 위치")
+            _, sha = s.state_get("offset")
+            # Jacob 이 지금 쓰고 있으니 10분 더 바로바로 반응
+            deadline = min(cap, max(deadline, time.time() + 10 * 60))
+        if time.time() >= deadline:
+            break
+    print(f"새 소식 {total}개 처리 · {round((time.time() - start) / 60, 1)}분 대기")
     remind_pending()
-
 
 if __name__ == "__main__":
     main()
