@@ -272,6 +272,10 @@ def reply(text: str, buttons=None, menu: bool = False) -> None:
 def handle_text(msg: dict) -> None:
     if not owner_ok(msg.get("from", {}).get("id")):
         return
+    if "voice" in msg or "audio" in msg:  # 🎤 음성 → 자비스
+        import voice
+        voice.handle(msg, sys.modules[__name__])
+        return
     t = (msg.get("text") or "").strip()
     if t in ("/start", "/menu", "메뉴"):
         reply("🗂 <b>비서실</b>이에요. 모든 에이전트의 보고와 결재가 여기로 와요.\n"
@@ -299,6 +303,9 @@ def handle_text(msg: dict) -> None:
         kdp[week] = {"books": books, "usd": usd, "time": time.time()}
         s.state_put("kdp_sales", kdp, sha, f"KDP 판매 기록 {week}")
         reply(f"📚 이번 주 KDP 판매 {books}권" + (f", ${usd:g}" if usd is not None else "") + " 기록했어요.")
+    elif len(t) >= 2:  # 메뉴에 없는 말 → 자비스가 알아듣고 답 (말로 하는 것과 같음)
+        import voice
+        voice.handle(msg, sys.modules[__name__])
     else:
         reply("아래 버튼을 눌러 주세요 👇", menu=True)
 
@@ -323,6 +330,18 @@ def main() -> None:
         reply("🗂 <b>비서실</b> 연결 완료!\n이제 모든 에이전트의 보고와 결재가 여기로 와요. 아래 버튼만 누르면 돼요.", menu=True)
         s.ask("hub", f"hello-{int(time.time())}", "시험 승인 요청이에요", "아무 버튼이나 눌러 보세요. 바로 '접수됐어요'가 뜨고 결과가 이 메시지에 붙어요.",
               buttons=[("👍 잘 보여요", "approve"), ("👎 이상해요", "drop")])
+        return
+    if "--voice-test" in sys.argv:  # 자비스 시험: 시세 + 목소리 (AI 없이)
+        import voice
+        line = voice.quote("SOXL")
+        reply(f"🎙 <b>자비스 시험</b>\n{s.esc(line)}\n\n이 아래에 목소리 답이 오면 성공이에요."
+              + ("" if voice._key() else "\n(GEMINI_API_KEY 열쇠는 아직 없어요)"))
+        ogg = voice.speak("안녕하세요 제이콥님, 자비스예요. " + line.split(" (")[0].replace("$", "") + " 달러예요.")
+        if ogg:
+            _, chat = s._auth()
+            s.tg("sendVoice", {"chat_id": chat}, file=("voice", ogg))
+        else:
+            sys.exit("목소리 만들기 실패")
         return
     if "--ask-kdp" in sys.argv:
         ask_kdp()
