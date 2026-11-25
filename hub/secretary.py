@@ -200,7 +200,17 @@ def ask(agent: str, key: str, title: str, body: str = "", *, photo: str | None =
         "buttons": buttons, "on_choice": on_choice,
         "repo": repo or os.environ.get("GITHUB_REPOSITORY", ""),
     })
+    listen_now(15)
     return key
+
+
+def listen_now(minutes: int = 15) -> None:
+    """비서실 봇을 '듣기 모드'로 깨움 → 그동안 버튼을 누르자마자 바로 반응.
+    워크플로에 permissions: actions: write 가 있어야 해요 (없으면 5분마다 확인하는 방식으로 처리)."""
+    code, j = _gh("POST", f"/repos/{HUB_REPO}/actions/workflows/secretary.yml/dispatches",
+                  {"ref": HUB_BRANCH, "inputs": {"listen": str(minutes)}})
+    if code != 204:
+        print(f"(비서실 듣기 모드를 켜지 못함 {code}: 버튼은 5분 안에 처리돼요)")
 
 
 # ---------------------------------------------------------------- 비서실 저장소 (상태 파일)
