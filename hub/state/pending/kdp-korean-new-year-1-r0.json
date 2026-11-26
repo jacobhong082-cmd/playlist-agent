@@ -4,7 +4,7 @@
  "title": "이번 주 책, 올릴까요?",
  "asked": 1795611429.4144554,
  "message_id": 138,
- "reminded": false,
+ "reminded": true,
  "buttons": [
   [
    "✅ 올리기",
