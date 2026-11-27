@@ -1,0 +1,30 @@
+{
+ "key": "pl-ep01-077692",
+ "agent": "playlist",
+ "title": "새 플레이리스트 영상 어때요?",
+ "asked": 1795758366.8123121,
+ "message_id": 237,
+ "reminded": false,
+ "buttons": [
+  [
+   "✅ 올리기",
+   "approve"
+  ],
+  [
+   "🔁 다시 만들기",
+   "redo"
+  ],
+  [
+   "❌ 버리기",
+   "drop"
+  ]
+ ],
+ "on_choice": {
+  "workflow": "upload.yml",
+  "inputs": {
+   "run_id": "45943077692",
+   "episode": "ep01"
+  }
+ },
+ "repo": "jacobhong082-cmd/playlist-agent"
+}
