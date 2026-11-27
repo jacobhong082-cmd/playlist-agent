@@ -84,10 +84,14 @@ def status_text() -> str:
         if a.get("manual"):
             lines.append(f"✍️ {s.esc(a['name'])} · {s.esc(a['manual'])}")
             continue
+        if not repo_token(a["repo"]) and "stock" in a["repo"]:
+            # 비공개 저장소(주식)는 STOCK_ACTIONS_TOKEN 이 있어야 볼 수 있음 → 한 줄로만 안내
+            if not any("주식 현황은" in l for l in lines):
+                lines.append("🔑 주식 현황은 열쇠(STOCK_ACTIONS_TOKEN)를 넣으면 보여요. 알림은 지금도 정상으로 와요.")
+            continue
         runs = latest_runs(a["repo"], a["workflow"])
         if not runs:
-            note = "아직 기록 없음" if repo_token(a["repo"]) or "stock" not in a["repo"] else "열쇠 필요"
-            lines.append(f"▫️ {s.esc(a['name'])} · {note}")
+            lines.append(f"▫️ {s.esc(a['name'])} · 아직 기록 없음")
             continue
         r = runs[0]
         if r["status"] != "completed":
@@ -420,16 +424,18 @@ def main() -> None:
 
 
 def keep_listening() -> None:
-    """하루 안에 보낸 승인 요청이 아직 남아 있으면, 이번 작업이 끝나자마자 다음 듣기 작업을 이어서 켬.
+    """agents.json 의 always_listen 이 true 이면 항상, 아니면 하루 안에 보낸 승인 요청이 남아 있을 때, 이번 작업이 끝나자마자 다음 듣기 작업을 이어서 켬.
     GitHub 5분 예약이 거의 안 돌아서, 승인 대기가 있는 동안은 언제 눌러도 바로 반응하게 하려는 것.
     승인 대기가 없거나 하루가 지나면 멈춤 (그 뒤엔 리마인드 + 예약 확인)."""
+    always = json.loads((Path(__file__).parent / "agents.json").read_text()).get("always_listen", False)
     fresh = [it for it in pending_items() if time.time() - it.get("asked", 0) < 24 * 3600]
-    if not fresh:
+    if not fresh and not always:
         print("승인 대기 없음 → 듣기 이어가기 안 함")
         return
     code, j = s._gh("POST", f"/repos/{s.HUB_REPO}/actions/workflows/secretary.yml/dispatches",
                     {"ref": s.HUB_BRANCH, "inputs": {"listen": "25"}})
-    print(f"승인 대기 {len(fresh)}건 → 다음 듣기 작업 예약 ({code})")
+    why = "항상 대기" if always else f"승인 대기 {len(fresh)}건"
+    print(f"{why} → 다음 듣기 작업 예약 ({code})")
 
 
 if __name__ == "__main__":
