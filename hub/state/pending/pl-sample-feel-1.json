@@ -2,9 +2,9 @@
  "key": "pl-sample-feel-1",
  "agent": "playlist",
  "title": "시험곡 2개 어땠어요?",
- "asked": 1795611168.4244468,
- "message_id": 137,
- "reminded": true,
+ "asked": 1795755573.2252257,
+ "message_id": 203,
+ "reminded": false,
  "buttons": [
   [
    "👍 좋아",
