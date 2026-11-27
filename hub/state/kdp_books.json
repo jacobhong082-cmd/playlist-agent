@@ -1,8 +1,12 @@
 {
  "korean-new-year-1": {
-  "status": "asked",
+  "status": "delivered",
   "redo": 0,
   "asked": "2026-11-25",
-  "fingerprint": "59c2bdd6d276d643"
+  "fingerprint": "59c2bdd6d276d643",
+  "delivered": "2026-11-27",
+  "pages": 54,
+  "price": 9.99,
+  "royalty": 3.15
  }
 }
