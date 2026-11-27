@@ -88,42 +88,47 @@ def ask_approval(book_id: str, redo: int):
 
 
 def send_doc(path: Path, caption: str):
-    _, chat = s._auth()
-    if not chat:
-        print("(텔레그램 설정 없음) 파일:", path)
-        return
-    s.tg("sendDocument", {"chat_id": chat, "caption": caption, "disable_notification": "true"},
-         file=("document", str(path)), timeout=300)
+    s.send_doc(AGENT, str(path), caption)
 
 
-def send_text(text: str):
-    _, chat = s._auth()
-    if not chat:
-        print(text)
-        return
-    s.tg("sendMessage", {"chat_id": chat, "text": text[:4000], "disable_notification": "true"})
+def _c(v) -> str:
+    """톡 누르면 복사되는 글씨 (텔레그램 회색 코드 글씨)."""
+    return f"<code>{s.esc(v)}</code>"
 
 
 def deliver(book_id: str, redo: int):
     info, out = build(book_id, redo)
     lst = json.loads((out / "listing.json").read_text())
     s.notify(AGENT, f"📦 '{lst['title']}' 올릴 준비 끝",
-             "아래 파일 2개를 길게 눌러 '파일에 저장' 해 두고, 문구는 순서대로 길게 눌러 복사 → KDP 칸에 붙여넣기 하세요.\n"
+             "아래 파일 2개를 길게 눌러 '파일에 저장' 해 두고, 문구는 회색 글씨를 톡 눌러 복사 → KDP 칸에 붙여넣기 하세요.\n"
              "안내서: KDP 화면 순서 = Details → Content → Pricing", level="normal")
     send_doc(out / "interior.pdf", f"① 속지 (Manuscript) · {info['pages']}쪽")
     send_doc(out / "cover.pdf", f"② 표지 (Cover) · 책등 {info['cover']['spine_in']}인치")
-    fields = [
-        ("제목 Title", lst["title"]), ("부제 Subtitle", lst["subtitle"]), ("시리즈 Series (이름 + 번호)", f"{lst['series']}\n번호(Series number): {lst.get('series_no', 1)}"),
-        ("저자 Author (이름 칸에 그대로)", lst["author"]),
-        ("설명 Description (KDP 설명 칸은 HTML도 받아요)", lst["description"]),
-        ("키워드 7칸 (한 줄씩 한 칸에)", "\n".join(lst["keywords"])),
-        ("카테고리 3개 (검색해서 고르기)", "\n".join(lst["categories"])),
-        ("인쇄 옵션", lst["trim"]), ("가격 Amazon.com", f"{lst['price_usd']}"),
-        ("AI 질문 답", lst["ai_answer"]),
-        ("그 밖에", f"Low-content: {lst['low_content']}\n성인 내용: {lst['adult_content']}\nExpanded Distribution: {lst['expanded_distribution']}"),
-    ]
-    for label, val in fields:
-        send_text(f"[{label}]\n{val}")
+    # 칸마다 말풍선 하나씩 보내면 너무 많아서: 한 메시지에 모으고, 회색 글씨를 톡 누르면 복사되게
+    tag = s._tag(AGENT)
+    sheet = [f"{tag} · <b>KDP 입력 문구</b> (회색 글씨를 톡 → 복사)",
+             "", "<b>① Details</b>",
+             f"제목 Title: {_c(lst['title'])}",
+             f"부제 Subtitle: {_c(lst['subtitle'])}",
+             f"시리즈 Series: {_c(lst['series'])} · 번호 {_c(lst.get('series_no', 1))}",
+             f"저자 Author: {_c(lst['author'])}",
+             "설명 Description: 바로 다음 메시지",
+             "키워드 7칸 (한 칸에 하나씩):"]
+    sheet += [f"{i}. {_c(k)}" for i, k in enumerate(lst["keywords"], 1)]
+    sheet += ["카테고리 3개 (검색해서 고르기):"] + [f"· {s.esc(c)}" for c in lst["categories"]]
+    sheet += [f"Low-content: {s.esc(lst['low_content'])} · 성인 내용: {s.esc(lst['adult_content'])}",
+              "", "<b>② Content</b>",
+              f"인쇄 옵션: {s.esc(lst['trim'])}",
+              "AI 질문 답:", s.esc(lst["ai_answer"]),
+              "", "<b>③ Pricing</b>",
+              f"가격 Amazon.com: {_c(lst['price_usd'])}",
+              f"Expanded Distribution: {s.esc(lst['expanded_distribution'])}"]
+    s.send_text(AGENT, "\n".join(sheet))
+    desc = f"{tag} · <b>설명 Description</b> (상자를 톡 → 전체 복사)\n<pre>{s.esc(lst['description'])}</pre>"
+    if len(desc) > 4000:  # 너무 길면 그냥 글로 (길게 눌러 복사)
+        s.send_text(AGENT, lst["description"], html=False)
+    else:
+        s.send_text(AGENT, desc)
     s.ask(AGENT, f"kdp-{book_id}-posted", f"'{lst['title']}' KDP에 올리셨나요?",
           "올리고 'Publish' 까지 누르셨으면 ✅ 를 눌러 주세요. 심사는 보통 72시간이에요.",
           buttons=[("✅ KDP에 올렸음", "posted"), ("⏰ 나중에", "later")],

@@ -8,7 +8,7 @@ songs = json.load(open(sys.argv[1]))
 folder, key = sys.argv[2], sys.argv[3]
 _, chat = s._auth()
 for i, song in enumerate(songs, 1):
-    r = s.tg("sendAudio", {"chat_id": chat, "title": song["title"], "performer": "AI 시험곡",
+    r = s.send("playlist", "sendAudio", {"title": song["title"], "performer": "AI 시험곡",
                            "caption": f"🎵 시험곡 {i} · {song['desc']}", "disable_notification": "true"},
              file=("audio", f"{folder}/{song['slug']}.mp3"), timeout=120)
     assert r.get("ok"), r

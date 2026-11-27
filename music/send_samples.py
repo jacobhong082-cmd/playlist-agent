@@ -8,7 +8,7 @@ songs = [("samples/01_rain_on_the_window.mp3", "Rain on the Window", "감성 보
          ("samples/02_last_bus_home.mp3", "Last Bus Home", "로파이 재즈 연주곡 · 막차 버스 · 78 BPM")]
 ids = []
 for i, (path, title, desc) in enumerate(songs, 1):
-    r = s.tg("sendAudio", {"chat_id": chat, "title": title, "performer": "AI 시험곡",
+    r = s.send("playlist", "sendAudio", {"title": title, "performer": "AI 시험곡",
                            "caption": f"🎵 시험곡 {i} · {desc}", "disable_notification": "true"},
              file=("audio", path), timeout=120)
     assert r.get("ok"), r

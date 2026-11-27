@@ -188,7 +188,7 @@ def handle(msg: dict, bot) -> None:
         bot.reply("🎤 음성 비서를 쓰려면 GEMINI_API_KEY 열쇠가 필요해요. 설치 안내를 따라 한 번만 넣어 주세요.")
         return
     try:
-        s.tg("sendChatAction", {"chat_id": chat, "action": "typing"})
+        s.tg("sendChatAction", {**bot.here(), "action": "typing"})
     except RuntimeError:
         pass
     ctx, pend, failed = context(bot)
@@ -241,4 +241,4 @@ def handle(msg: dict, bot) -> None:
     if is_voice:  # 말로 물으면 말로도 답
         ogg = speak(say)
         if ogg:
-            s.tg("sendVoice", {"chat_id": chat, "disable_notification": "true"}, file=("voice", ogg))
+            s.tg("sendVoice", {**bot.here(), "disable_notification": "true"}, file=("voice", ogg))
