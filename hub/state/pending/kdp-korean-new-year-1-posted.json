@@ -1,0 +1,26 @@
+{
+ "key": "kdp-korean-new-year-1-posted",
+ "agent": "kdp",
+ "title": "'Korean New Year Activity Book' KDP에 올리셨나요?",
+ "asked": 1795755682.2041075,
+ "message_id": 228,
+ "reminded": false,
+ "buttons": [
+  [
+   "✅ KDP에 올렸음",
+   "posted"
+  ],
+  [
+   "⏰ 나중에",
+   "later"
+  ]
+ ],
+ "on_choice": {
+  "workflow": "kdp-book.yml",
+  "inputs": {
+   "book": "korean-new-year-1",
+   "redo": "0"
+  }
+ },
+ "repo": "jacobhong082-cmd/playlist-agent"
+}
