@@ -7,7 +7,7 @@ out = sys.argv[1]
 made = json.load(open(f"{out}/made.json"))
 _, chat = s._auth()
 for m in made:
-    r = s.tg("sendVideo", {"chat_id": chat, "caption": f"🎬 실사 샘플 {m['n']} · {m['label']}",
+    r = s.send("playlist", "sendVideo", {"caption": f"🎬 실사 샘플 {m['n']} · {m['label']}",
                            "supports_streaming": "true", "width": "1280", "height": "720",
                            "disable_notification": "true"},
              file=("video", f"{out}/{m['file']}"), timeout=180)

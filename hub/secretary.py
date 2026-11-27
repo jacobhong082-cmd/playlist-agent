@@ -39,12 +39,19 @@ import uuid
 HUB_REPO = "jacobhong082-cmd/playlist-agent"
 HUB_BRANCH = os.environ.get("HUB_BRANCH", "main")
 
-# 에이전트 이름표 (텔레그램 메시지 맨 앞에 붙는 꼬리표)
+# 에이전트 이름표 (텔레그램 메시지 맨 앞에 붙는 꼬리표). 색 = 그룹 '주제(Topics)' 아이콘 색과 같음
 AGENTS = {
-    "playlist": "🎵 플레이리스트",
-    "kdp": "📚 KDP",
-    "stock": "📈 주식",
-    "hub": "🗂 비서실",
+    "playlist": "🟣 플레이리스트",
+    "kdp": "🟡 KDP",
+    "stock": "🔵 주식",
+    "hub": "🟢 비서실",
+}
+# 텔레그램 그룹 주제(Topics): 이름 · 아이콘 색 (텔레그램이 허용하는 6색 중)
+TOPICS = {
+    "hub": ("🗂 비서실", 0x8EEE98),        # 초록
+    "kdp": ("📚 KDP", 0xFFD67E),          # 노랑
+    "playlist": ("🎵 플레이리스트", 0xCB86DB),  # 보라
+    "stock": ("📈 주식", 0x6FB9F0),        # 파랑
 }
 
 # 승인 버튼 기본 세트
@@ -113,24 +120,86 @@ def _tag(agent: str) -> str:
     return AGENTS.get(agent, agent)
 
 
-def _send(text: str, *, silent: bool, buttons=None, photo: str | None = None) -> dict | None:
+_TOPICS_CACHE: dict = {}
+
+
+def topics() -> dict:
+    """그룹 설정 {"chat": 그룹 id, "threads": {"kdp": 주제 id, ...}} — 아직 그룹이 없으면 {}."""
+    if "v" not in _TOPICS_CACHE:
+        try:
+            t, _ = state_get("topics", {})
+        except Exception as e:  # 못 읽으면 1:1 대화방으로
+            print(f"(주제 설정 읽기 실패: {e})")
+            t = {}
+        _TOPICS_CACHE["v"] = t or {}
+    return _TOPICS_CACHE["v"]
+
+
+def route(agent: str = "hub") -> dict:
+    """이 에이전트 메시지가 갈 곳: 그룹이 있으면 그 프로젝트 주제, 없으면 1:1 대화방."""
+    _, chat = _auth()
+    t = topics()
+    if t.get("chat") and t.get("threads"):
+        th = t["threads"].get(agent) or t["threads"].get("hub")
+        return {"chat_id": t["chat"], **({"message_thread_id": th} if th else {})}
+    return {"chat_id": chat}
+
+
+def send(agent: str, method: str, params: dict, file=None, timeout: int = 60) -> dict:
+    """프로젝트 주제로 보내기. 주제가 지워졌거나 그룹에서 빠졌으면 1:1 대화방으로 대신 보냄."""
+    r = route(agent)
+    try:
+        return tg(method, {**params, **r}, file=file, timeout=timeout)
+    except RuntimeError as e:
+        _, chat = _auth()
+        if str(r["chat_id"]) == chat:
+            raise
+        print(f"(그룹 주제로 못 보내 1:1로 보냄: {e})")
+        return tg(method, {**params, "chat_id": chat}, file=file, timeout=timeout)
+
+
+def send_text(agent: str, text: str, *, html: bool = True, silent: bool = True, buttons=None) -> dict | None:
+    """그냥 글 한 개 (꼬리표 없이). html=True 면 <b>, <code> 사용 가능."""
+    token, chat = _auth()
+    if not token or not chat:
+        print(text)
+        return None
+    p = {"text": text[:4000], "disable_notification": "true" if silent else "false",
+         "disable_web_page_preview": "true"}
+    if html:
+        p["parse_mode"] = "HTML"
+    if buttons:
+        p["reply_markup"] = {"inline_keyboard": buttons}
+    return send(agent, "sendMessage", p).get("result")
+
+
+def send_doc(agent: str, path: str, caption: str = "", silent: bool = True) -> dict | None:
+    token, chat = _auth()
+    if not token or not chat:
+        print("(텔레그램 설정 없음) 파일:", path)
+        return None
+    return send(agent, "sendDocument", {"caption": caption[:1000], "disable_notification": "true" if silent else "false"},
+                file=("document", str(path)), timeout=300).get("result")
+
+
+def _send(text: str, *, silent: bool, buttons=None, photo: str | None = None, agent: str = "hub") -> dict | None:
     token, chat = _auth()
     if not token or not chat:
         print("(텔레그램 설정이 없어 전송 생략)\n" + text)
         return None
-    p = {"chat_id": chat, "parse_mode": "HTML", "disable_notification": "true" if silent else "false",
+    p = {"parse_mode": "HTML", "disable_notification": "true" if silent else "false",
          "disable_web_page_preview": "true"}
     if buttons:
         p["reply_markup"] = {"inline_keyboard": buttons}
     if photo and os.path.exists(photo):
         p["caption"] = text[:1000]
         try:
-            return tg("sendPhoto", p, file=("photo", photo))["result"]
+            return send(agent, "sendPhoto", p, file=("photo", photo))["result"]
         except RuntimeError as e:
             print(f"(사진 전송 실패, 글로만 보냄: {e})")
             p.pop("caption")
     p["text"] = text[:4000]
-    return tg("sendMessage", p)["result"]
+    return send(agent, "sendMessage", p)["result"]
 
 
 def esc(s) -> str:
@@ -149,13 +218,13 @@ def notify(agent: str, title: str, body: str = "", level: str = "normal",
     if level == "log":
         print("[기록] " + text)
         return None
-    return _send(text, silent=(level != "urgent"), photo=photo)
+    return _send(text, silent=(level != "urgent"), photo=photo, agent=agent)
 
 
 def fail(agent: str, job: str, reason: str, retry: tuple[str, str] | None = None,
          link: str | None = None, auto_retry_note: str | None = None) -> dict | None:
     """실패 알림 (소리 남). retry=(저장소 이름, 워크플로 파일) 을 주면 '🔁 지금 다시' 버튼이 붙습니다."""
-    text = f"{_tag(agent)} · 🔴 <b>실패</b>\n<b>{esc(job)}</b> 작업이 멈췄어요\n원인: {esc(reason)[:400]}"
+    text = f"{_tag(agent)} · ❗ <b>실패</b>\n<b>{esc(job)}</b> 작업이 멈췄어요\n원인: {esc(reason)[:400]}"
     if auto_retry_note:
         text += f"\n→ {esc(auto_retry_note)}"
     if link:
@@ -167,7 +236,7 @@ def fail(agent: str, job: str, reason: str, retry: tuple[str, str] | None = None
         if len(data.encode()) <= 64:
             buttons = [[{"text": "🔁 지금 다시", "callback_data": data},
                         {"text": "🔕 오늘은 쉬기", "callback_data": "x|skip"}]]
-    return _send(text, silent=False, buttons=buttons)
+    return _send(text, silent=False, buttons=buttons, agent=agent)
 
 
 # ---------------------------------------------------------------- 승인
@@ -185,7 +254,7 @@ def ask(agent: str, key: str, title: str, body: str = "", *, photo: str | None =
     돌려주는 값: 실제로 쓴 key."""
     key = _short_key(key)
     buttons = buttons or APPROVE_BUTTONS
-    text = f"{_tag(agent)} · 🟡 <b>승인 필요</b>\n<b>{esc(title)}</b>"
+    text = f"{_tag(agent)} · ✋ <b>승인 필요</b>\n<b>{esc(title)}</b>"
     if body:
         text += f"\n{esc(body)}"
     if checks:
@@ -193,7 +262,7 @@ def ask(agent: str, key: str, title: str, body: str = "", *, photo: str | None =
         if not all(ok for ok, _ in checks):
             text += "\n⚠️ 확인 안 된 항목이 있어요"
     kb = [[{"text": label, "callback_data": f"a|{key}|{choice}"} for label, choice in buttons]]
-    msg = _send(text, silent=False, buttons=kb, photo=photo)
+    msg = _send(text, silent=False, buttons=kb, photo=photo, agent=agent)
     register_pending({
         "key": key, "agent": agent, "title": title, "asked": time.time(),
         "message_id": (msg or {}).get("message_id"), "reminded": False,

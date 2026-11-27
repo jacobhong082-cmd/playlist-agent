@@ -250,7 +250,7 @@ def main() -> None:
     print(f"카드 완성: {out}")
     if is_sample:
         return
-    s._send(caption(d), silent=False, photo=str(out))
+    s._send(caption(d), silent=False, photo=str(out), agent="hub")
     print("텔레그램 전송 완료")
 
 

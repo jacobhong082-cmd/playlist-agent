@@ -187,6 +187,10 @@ def handle_callback(cb: dict) -> None:
         return
     parts = data.split("|")
     toast, result = "처리했어요", None
+    if parts[0] == "g":  # 그룹 주제 설정 다시 확인
+        answer(cb, "확인할게요")
+        setup_group((cb.get("message") or {}).get("chat", {}).get("id"))
+        return
     if parts[0] == "a" and len(parts) == 3:
         key, choice = parts[1], parts[2]
         label = s.CHOICE_LABEL.get(choice, choice)
@@ -263,19 +267,110 @@ def save_kdp(week: str, books: int) -> None:
 SALES = re.compile(r"^\s*판매\s*(\d+)\s*(?:권)?\s*(?:\$?\s*([\d.]+)\s*(?:달러|\$)?)?\s*$")
 
 
+CTX: dict = {}  # 지금 처리 중인 메시지가 온 곳 (그룹의 어느 주제인지)
+
+
+def here() -> dict:
+    """답장 보낼 곳: 방금 누른 곳(그룹 주제 또는 1:1), 아니면 비서실 주제."""
+    return dict(CTX.get("route") or s.route("hub"))
+
+
 def reply(text: str, buttons=None, menu: bool = False) -> None:
-    _, chat = s._auth()
-    p = {"chat_id": chat, "text": text[:4000], "parse_mode": "HTML", "disable_web_page_preview": "true"}
+    p = {"text": text[:4000], "parse_mode": "HTML", "disable_web_page_preview": "true"}
     if buttons:
         p["reply_markup"] = {"inline_keyboard": buttons}
     elif menu:
         p["reply_markup"] = MENU
-    s.tg("sendMessage", p)
+    if CTX.get("route"):
+        s.tg("sendMessage", {**p, **CTX["route"]})
+    else:
+        s.send("hub", "sendMessage", p)
+
+
+# ---------------------------------------------------------------- 그룹 주제(Topics) 자동 만들기
+TOPIC_HELLO = {
+    "hub": "비서실 본부예요. 현황 · 승인 대기 · 성적표 · 실패 알림이 여기로 와요. 아래 메뉴 버튼을 써 주세요 👇",
+    "kdp": "KDP 책 방이에요. 매주 새 책 승인, 올릴 파일과 문구가 여기로 와요.",
+    "playlist": "플레이리스트 유튜브 방이에요. 곡·영상 승인과 업로드 소식이 여기로 와요.",
+    "stock": "주식 방이에요. 시황 브리핑, 급변 알림, 모의 매매 소식이 여기로 와요.",
+}
+
+
+def _group_ask(chat_id, text: str) -> None:
+    s.tg("sendMessage", {"chat_id": chat_id, "text": text, "parse_mode": "HTML",
+                         "reply_markup": {"inline_keyboard": [[{"text": "🔄 했어요, 다시 확인", "callback_data": "g|setup"}]]}})
+
+
+def setup_group(chat_id) -> bool:
+    """Jacob 이 만든 그룹에 프로젝트별 색깔 주제를 만들고, 이후 모든 메시지를 거기로 보냄."""
+    info = s.tg("getChat", {"chat_id": chat_id})["result"]
+    if not info.get("is_forum"):
+        _group_ask(chat_id, "🟢 <b>비서실</b>이에요!\n그룹 이름을 눌러 → 편집(연필) → <b>주제(Topics)</b> 를 켜 주세요. "
+                            "그러면 프로젝트마다 색깔 방을 만들어 드릴게요.")
+        return False
+    t, sha = s.state_get("topics", {})
+    t = t or {}
+    threads = dict(t.get("threads") or {}) if str(t.get("chat")) == str(chat_id) else {}
+    made = []
+    try:
+        for agent, (name, color) in s.TOPICS.items():
+            if agent in threads:
+                continue
+            r = s.tg("createForumTopic", {"chat_id": chat_id, "name": name, "icon_color": color})["result"]
+            threads[agent] = r["message_thread_id"]
+            made.append(agent)
+    except RuntimeError as e:
+        print(f"(주제 만들기 실패: {e})")
+        if threads:
+            s.state_put("topics", {"chat": chat_id, "threads": threads, "partial": True}, sha, "비서실: 그룹 주제 일부")
+        _group_ask(chat_id, "🟢 봇에게 권한이 조금 더 필요해요.\n그룹 이름 → 편집 → <b>관리자</b> → jacob_stock_bot → "
+                            "<b>주제 관리</b> 를 켜고 저장해 주세요.")
+        return False
+    s.state_put("topics", {"chat": chat_id, "threads": threads, "time": time.time()}, sha, "비서실: 그룹 주제 연결")
+    s._TOPICS_CACHE["v"] = {"chat": chat_id, "threads": threads}
+    CTX.pop("route", None)
+    for agent in made:
+        p = {"chat_id": chat_id, "message_thread_id": threads[agent],
+             "text": f"{s._tag(agent)}\n{TOPIC_HELLO.get(agent, '')}", "disable_notification": "true"}
+        if agent == "hub":
+            p["reply_markup"] = MENU
+        s.tg("sendMessage", p)
+    _, me = s._auth()
+    try:
+        s.tg("sendMessage", {"chat_id": me, "text": "✅ 이제부터 알림은 '비서실' 그룹의 색깔 방으로 가요.\n"
+                                                  "🟢 비서실 · 🟡 KDP · 🟣 플레이리스트 · 🔵 주식\n이 1:1 방은 비상용으로만 써요."})
+    except RuntimeError:
+        pass
+    print(f"그룹 주제 연결 완료: {threads}")
+    return True
+
+
+def maybe_setup(chat: dict, from_id) -> bool:
+    """주인이 그룹에서 처음 말하거나 봇을 관리자로 올리면 자동 연결. 이미 연결된 그룹이면 False."""
+    if chat.get("type") not in ("group", "supergroup") or not owner_ok(from_id):
+        return False
+    t = s.topics()
+    if str(t.get("chat")) == str(chat.get("id")) and not t.get("partial"):
+        return False
+    setup_group(chat["id"])
+    return True
 
 
 def handle_text(msg: dict) -> None:
     if not owner_ok(msg.get("from", {}).get("id")):
         return
+    chat = msg.get("chat", {})
+    if msg.get("migrate_to_chat_id"):  # 주제를 켜면 그룹이 새 번호로 바뀜 → 새 번호 쪽에서 처리
+        return
+    if chat.get("type") in ("group", "supergroup"):
+        if maybe_setup(chat, msg["from"]["id"]):
+            return
+        if not (msg.get("text") or "voice" in msg or "audio" in msg):
+            return  # 입장·주제 생성 같은 안내 메시지는 무시
+        CTX["route"] = {"chat_id": chat["id"],
+                        **({"message_thread_id": msg["message_thread_id"]} if msg.get("is_topic_message") else {})}
+    else:
+        CTX["route"] = {"chat_id": chat.get("id")} if chat.get("id") else None
     if "voice" in msg or "audio" in msg:  # 🎤 음성 → 자비스
         import voice
         voice.handle(msg, sys.modules[__name__])
@@ -314,15 +409,21 @@ def handle_text(msg: dict) -> None:
         reply("아래 버튼을 눌러 주세요 👇", menu=True)
 
 
+def handle_member(m: dict) -> None:
+    """봇이 그룹에 들어가거나 관리자가 됐을 때: 관리자면 바로 주제 만들기 시도."""
+    if (m.get("new_chat_member") or {}).get("status") == "administrator":
+        maybe_setup(m.get("chat", {}), (m.get("from") or {}).get("id"))
+
+
 # ---------------------------------------------------------------- 24시간 리마인드
 def remind_pending() -> None:
     for it in pending_items():
         if it.get("reminded") or time.time() - it.get("asked", 0) < 24 * 3600:
             continue
         btns = it.get("buttons") or s.APPROVE_BUTTONS
-        reply(f"⏰ 하루 동안 답이 없어서 한 번만 다시 여쭤요.\n{s._tag(it['agent'])} <b>{s.esc(it['title'])}</b>\n"
-              "누르기 전까지는 다음 단계를 멈춰 둘게요.",
-              buttons=[[{"text": lab, "callback_data": f"a|{it['key']}|{ch}"} for lab, ch in btns]])
+        s._send(f"⏰ 하루 동안 답이 없어서 한 번만 다시 여쭤요.\n{s._tag(it['agent'])} <b>{s.esc(it['title'])}</b>\n"
+                "누르기 전까지는 다음 단계를 멈춰 둘게요.", silent=False, agent=it.get("agent", "hub"),
+                buttons=[[{"text": lab, "callback_data": f"a|{it['key']}|{ch}"} for lab, ch in btns]])
         sha = it.pop("_sha")
         it["reminded"] = True
         s.state_put(f"pending/{it['key']}", it, sha, f"리마인드: {it['title'][:40]}")
@@ -342,8 +443,7 @@ def main() -> None:
               + ("" if voice._key() else "\n(GEMINI_API_KEY 열쇠는 아직 없어요)"))
         ogg = voice.speak("안녕하세요 제이콥님, 자비스예요. " + line.split(" (")[0].replace("$", "") + " 달러예요.")
         if ogg:
-            _, chat = s._auth()
-            s.tg("sendVoice", {"chat_id": chat}, file=("voice", ogg))
+            s.send("hub", "sendVoice", {}, file=("voice", ogg))
         else:
             sys.exit("목소리 만들기 실패")
         return
@@ -356,8 +456,8 @@ def main() -> None:
                 print(f"(승인 대기에 없는 요청: {key})")
                 continue
             btns = item.get("buttons") or s.APPROVE_BUTTONS
-            msg = s._send(f"{s._tag(item['agent'])} · 🟡 <b>승인 필요</b> (다시 보내요)\n<b>{s.esc(item['title'])}</b>\n"
-                          "누르자마자 '접수됐어요'가 떠요.", silent=False,
+            msg = s._send(f"{s._tag(item['agent'])} · ✋ <b>승인 필요</b> (다시 보내요)\n<b>{s.esc(item['title'])}</b>\n"
+                          "누르자마자 '접수됐어요'가 떠요.", silent=False, agent=item.get("agent", "hub"),
                           buttons=[[{"text": lab, "callback_data": f"a|{key}|{ch}"} for lab, ch in btns]])
             item["message_id"] = (msg or {}).get("message_id")
             s.state_put(f"pending/{key}", item, isha, f"다시 보냄: {item['title'][:40]}")
@@ -377,6 +477,8 @@ def main() -> None:
             handle_callback(u["callback_query"])
         elif "message" in u:
             handle_text(u["message"])
+        elif "my_chat_member" in u:
+            handle_member(u["my_chat_member"])
         print("넘겨받은 소식 1개 처리")
         return
     # 듣기 모드: 그 시간 동안은 버튼을 누르자마자 바로 반응 (텔레그램 '롱폴링')
@@ -394,7 +496,7 @@ def main() -> None:
         wait = int(max(0, min(50, deadline - time.time())))
         try:
             res = s.tg("getUpdates", {"offset": offset, "timeout": wait,
-                                      "allowed_updates": ["message", "callback_query"]}, timeout=wait + 20)
+                                      "allowed_updates": ["message", "callback_query", "my_chat_member"]}, timeout=wait + 20)
         except RuntimeError as e:
             if "409" in str(e):
                 print("(다른 확인 작업이 같은 봇을 읽는 중이라 이번엔 건너뜀)")
@@ -403,10 +505,13 @@ def main() -> None:
         updates = res.get("result", [])
         for u in updates:
             try:
+                CTX.clear()
                 if "callback_query" in u:
                     handle_callback(u["callback_query"])
                 elif "message" in u:
                     handle_text(u["message"])
+                elif "my_chat_member" in u:
+                    handle_member(u["my_chat_member"])
             except Exception as e:  # 하나가 실패해도 나머지는 처리
                 print(f"(처리 실패 {u.get('update_id')}: {type(e).__name__}: {e})")
         if updates:
