@@ -4,7 +4,7 @@
  "title": "이번 연주곡들은 어땠어요?",
  "asked": 1795756866.9135103,
  "message_id": 235,
- "reminded": false,
+ "reminded": true,
  "buttons": [
   [
    "👍 좋아",
